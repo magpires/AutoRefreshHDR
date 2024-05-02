@@ -13,57 +13,109 @@ namespace AutoRefreshHDR
             bool hdrActivated = false;
             bool monitorIn144hzMode = false;
 
-            while (true)
+            try
             {
-                foreach (var program in programPaths)
+                Console.WriteLine("Checking for the execution of any program in the list...");
+                while (true)
                 {
-                    Console.WriteLine($"Checking the {program} program");
-                    if (Process.GetProcessesByName(program.Replace(".exe", "")).Length != 0)
+                    foreach (var program in programPaths)
                     {
-                        Console.WriteLine($"Program {program} is running. Applying changes...");
-                        ChangeRefreshRate(newRefreshRate);
-                        monitorIn144hzMode = true;
-
-                        if (hdrPrograms.Contains(program) && !hdrActivated)
+                        if (Process.GetProcessesByName(program.Replace(".exe", "")).Length != 0)
                         {
-                            Console.WriteLine($"Activating HDR for {program}...");
-                            ActivateHDR();
-                            hdrActivated = true;
+                            Console.ForegroundColor = ConsoleColor.Green;
+                            Console.WriteLine($"Program {program} is running. Applying changes...");
+                            Console.ResetColor();
+                            ChangeRefreshRate(newRefreshRate);
+                            monitorIn144hzMode = true;
+
+                            if (hdrPrograms.Contains(program) && !hdrActivated)
+                            {
+                                Console.WriteLine($"Activating HDR for {program}...");
+                                HDRSwitch();
+                                hdrActivated = true;
+                            }
+                            while (Process.GetProcessesByName(program.Replace(".exe", "")).Length != 0)
+                                Thread.Sleep(1000);
                         }
-                        while(Process.GetProcessesByName(program.Replace(".exe", "")).Length != 0)
-                            Thread.Sleep(1000);
+
+                        if (hdrActivated || monitorIn144hzMode)
+                        {
+                            Console.WriteLine($"All programs are closed. Restoring settings...");
+                            if (hdrActivated)
+                                HDRSwitch();
+
+                            ChangeRefreshRate(oldRefreshRate);
+                            hdrActivated = false;
+                            monitorIn144hzMode = false;
+                        }
+                        Thread.Sleep(1000);
                     }
-
-                    if (hdrActivated || monitorIn144hzMode)
-                    {
-                        Console.WriteLine($"All programs are closed. Restoring settings...");
-                        if (hdrActivated)
-                            DeactivateHDR();
-
-                        ChangeRefreshRate(oldRefreshRate);
-                        hdrActivated = false;
-                        monitorIn144hzMode = false;
-                    }
-
-                    // Wait for a bit before checking the next program
-                    Thread.Sleep(1000);
                 }
+            }
+            catch (Exception e)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"{e}");
+                Console.ResetColor();
             }
         }
 
         static void ChangeRefreshRate(int refreshRate)
         {
-            // Implement the logic to change the refresh rate
+            Console.WriteLine($"Refresh rate changed to: {refreshRate} Hz.");
+
+            ProcessStartInfo startInfo = new ProcessStartInfo
+            {
+                FileName = "cmd.exe",
+                Arguments = $"/c QRes /r:{refreshRate}",
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
+            };
+
+            using (Process? process = Process.Start(startInfo))
+            {
+                string output = process.StandardOutput.ReadToEnd();
+                string error = process.StandardError.ReadToEnd();
+
+                process.WaitForExit();
+
+                Console.WriteLine(output);
+                if (string.IsNullOrEmpty(error) == false)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"Error changing refresh rate: {error}");
+                    Console.ResetColor();
+                }
+            }
         }
 
-        static void ActivateHDR()
+        static void HDRSwitch()
         {
-            // Implement the logic to activate HDR
-        }
+            ProcessStartInfo startInfo = new ProcessStartInfo
+            {
+                FileName = "cmd.exe",
+                Arguments = $"/c hdr_switch_tray.exe hdr",
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
+            };
 
-        static void DeactivateHDR()
-        {
-            // Implement the logic to deactivate HDR
+            using (Process? process = Process.Start(startInfo))
+            {
+                string output = process.StandardOutput.ReadToEnd();
+                string error = process.StandardError.ReadToEnd();
+
+                process.WaitForExit();
+
+                Console.WriteLine(output);
+                if (string.IsNullOrEmpty(error) == false)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"error switching HDR: {error}");
+                    Console.ResetColor();
+                }
+            }
         }
     }
 }
