@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using AutoRefreshHDR.Models;
+using System.Diagnostics;
 
 namespace AutoRefreshHDR
 {
@@ -6,47 +7,56 @@ namespace AutoRefreshHDR
     {
         static void Main(string[] args)
         {
-            string[] programPaths = { "Diablo IV.exe", "pcsx2-qt.exe", "Cemu.exe" };
-            string[] hdrPrograms = { "Diablo IV.exe" };
-            int newRefreshRate = 144;
-            int oldRefreshRate = 120;
+            IEnumerable<ProgramDisplayConfig> programDisplayConfigs =
+            [
+                new ProgramDisplayConfig { ProgramName = "Diablo IV.exe", refreshRate = 144, Hdr = true },
+                new ProgramDisplayConfig { ProgramName = "pcsx2-qt.exe", refreshRate = 144},
+                new ProgramDisplayConfig { ProgramName = "pcsx2-qt.exe", refreshRate = 144 },
+                new ProgramDisplayConfig { ProgramName = "snes9x-x64.exe", refreshRate = 60 },
+                new ProgramDisplayConfig { ProgramName = "Cemu.exe", refreshRate = 144 },
+            ];
+
+            DisplayConfig displayConfig = new DisplayConfig { CurrentRefreshRate = 120 };
+
             bool hdrActivated = false;
-            bool monitorIn144hzMode = false;
+            bool refreshRateChange = false;
 
             try
             {
                 Console.WriteLine("Checking for the execution of any program in the list...");
                 while (true)
                 {
-                    foreach (var program in programPaths)
+                    foreach (var programDisplayConfig in programDisplayConfigs)
                     {
-                        if (Process.GetProcessesByName(program.Replace(".exe", "")).Length != 0)
+                        if (Process.GetProcessesByName(programDisplayConfig.ProgramName.Replace(".exe", "")).Length != 0)
                         {
                             Console.ForegroundColor = ConsoleColor.Green;
-                            Console.WriteLine($"Program {program} is running. Applying changes...");
+                            Console.WriteLine($"Program {programDisplayConfig.ProgramName} is running. Applying changes...");
                             Console.ResetColor();
-                            ChangeRefreshRate(newRefreshRate);
-                            monitorIn144hzMode = true;
+                            ChangeRefreshRate(programDisplayConfig.refreshRate);
+                            refreshRateChange = true;
 
-                            if (hdrPrograms.Contains(program) && hdrActivated == false)
+                            if (programDisplayConfig.Hdr && hdrActivated == false)
                             {
-                                Console.WriteLine($"Activating HDR for {program}...");
+                                Console.WriteLine($"Activating HDR for {programDisplayConfig.ProgramName}...");
                                 HDRSwitchOn();
                                 hdrActivated = true;
                             }
-                            while (Process.GetProcessesByName(program.Replace(".exe", "")).Length != 0)
+                            while (Process.GetProcessesByName(programDisplayConfig.ProgramName.Replace(".exe", "")).Length != 0)
                                 Thread.Sleep(1000);
                         }
 
-                        if (hdrActivated || monitorIn144hzMode)
+                        if (hdrActivated || refreshRateChange)
                         {
                             Console.WriteLine($"All programs are closed. Restoring settings...");
                             if (hdrActivated)
                                 HDRSwitchOff();
 
-                            ChangeRefreshRate(oldRefreshRate);
+                            if (refreshRateChange)
+                                ChangeRefreshRate(displayConfig.CurrentRefreshRate);
+
                             hdrActivated = false;
-                            monitorIn144hzMode = false;
+                            refreshRateChange = false;
                         }
                         Thread.Sleep(1000);
                     }
