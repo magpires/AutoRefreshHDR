@@ -8,16 +8,15 @@ namespace AutoRefreshHDR
     {
         static void Main(string[] args)
         {
-            var currentDirectory = AppContext.BaseDirectory;
-            var configFilePath = Path.Combine(currentDirectory, "appsettings.json");
-
-            DisplayConfig displayConfig = JsonConvert.DeserializeObject<DisplayConfig>(File.ReadAllText(configFilePath)) ?? new DisplayConfig();
-
-            bool hdrActivated = false;
-            bool refreshRateChange = false;
-
             try
             {
+                var configFilePath = Path.Combine(AppContext.BaseDirectory, "appsettings.json");
+
+                DisplayConfig displayConfig = JsonConvert.DeserializeObject<DisplayConfig>(File.ReadAllText(configFilePath)) ?? new DisplayConfig();
+
+                bool hdrActivated = false;
+                bool refreshRateChange = false;
+
                 Console.WriteLine("Checking for the execution of any program in the list...");
                 while (true)
                 {
@@ -69,8 +68,7 @@ namespace AutoRefreshHDR
         {
             Console.WriteLine($"Refresh rate changed to: {refreshRate} Hz.");
 
-            var currentDirectory = AppContext.BaseDirectory;
-            var pathToQRes = Path.Combine(currentDirectory, "Utils", "QRes.exe");
+            var pathToQRes = Path.Combine(AppContext.BaseDirectory, "Utils", "QRes.exe");
 
             ProcessStartInfo startInfo = new ProcessStartInfo
             {
@@ -100,8 +98,7 @@ namespace AutoRefreshHDR
 
         static void HDRSwitchOn()
         {
-            var currentDirectory = AppContext.BaseDirectory;
-            var pathToHdrSwitchTry = Path.Combine(currentDirectory, "Utils", "hdr_switch_tray.exe");
+            var pathToHdrSwitchTry = Path.Combine(AppContext.BaseDirectory, "Utils", "hdr_switch_tray.exe");
 
             using (Process? initialProcess = Process.Start(pathToHdrSwitchTry))
             {
