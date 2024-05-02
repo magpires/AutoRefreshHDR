@@ -28,10 +28,10 @@ namespace AutoRefreshHDR
                             ChangeRefreshRate(newRefreshRate);
                             monitorIn144hzMode = true;
 
-                            if (hdrPrograms.Contains(program) && !hdrActivated)
+                            if (hdrPrograms.Contains(program) && hdrActivated == false)
                             {
                                 Console.WriteLine($"Activating HDR for {program}...");
-                                HDRSwitch();
+                                HDRSwitchOn();
                                 hdrActivated = true;
                             }
                             while (Process.GetProcessesByName(program.Replace(".exe", "")).Length != 0)
@@ -42,7 +42,7 @@ namespace AutoRefreshHDR
                         {
                             Console.WriteLine($"All programs are closed. Restoring settings...");
                             if (hdrActivated)
-                                HDRSwitch();
+                                HDRSwitchOff();
 
                             ChangeRefreshRate(oldRefreshRate);
                             hdrActivated = false;
@@ -64,9 +64,12 @@ namespace AutoRefreshHDR
         {
             Console.WriteLine($"Refresh rate changed to: {refreshRate} Hz.");
 
+            var currentDirectory = AppContext.BaseDirectory;
+            var pathToQRes = Path.Combine(currentDirectory, "Utils", "QRes.exe");
+
             ProcessStartInfo startInfo = new ProcessStartInfo
             {
-                FileName = "cmd.exe",
+                FileName = pathToQRes,
                 Arguments = $"/c QRes /r:{refreshRate}",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
@@ -90,12 +93,19 @@ namespace AutoRefreshHDR
             }
         }
 
-        static void HDRSwitch()
+        static void HDRSwitchOn()
         {
+            var currentDirectory = AppContext.BaseDirectory;
+            var pathToHdrSwitchTry = Path.Combine(currentDirectory, "Utils", "hdr_switch_tray.exe");
+
+            using (Process? initialProcess = Process.Start(pathToHdrSwitchTry))
+            {
+            }
+
             ProcessStartInfo startInfo = new ProcessStartInfo
             {
-                FileName = "cmd.exe",
-                Arguments = $"/c hdr_switch_tray.exe hdr",
+                FileName = pathToHdrSwitchTry,
+                Arguments = "hdr",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true
@@ -115,6 +125,14 @@ namespace AutoRefreshHDR
                     Console.WriteLine($"error switching HDR: {error}");
                     Console.ResetColor();
                 }
+            }
+        }
+
+        static void HDRSwitchOff()
+        {
+            foreach (Process proc in Process.GetProcessesByName("hdr_switch_tray"))
+            {
+                proc.Kill();
             }
         }
     }
