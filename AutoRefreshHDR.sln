@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34728.123
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoRefreshHDR", "AutoRefreshHDR.csproj", "{BE05CC46-96E8-4697-9745-27D7DDFE56AA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BE05CC46-96E8-4697-9745-27D7DDFE56AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE05CC46-96E8-4697-9745-27D7DDFE56AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE05CC46-96E8-4697-9745-27D7DDFE56AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE05CC46-96E8-4697-9745-27D7DDFE56AA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1EF80A54-2EDA-48FC-925C-6AB3F669498F}
+	EndGlobalSection
+EndGlobal
