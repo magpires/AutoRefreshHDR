@@ -1,4 +1,5 @@
 ﻿using AutoRefreshHDR.Models;
+using Newtonsoft.Json;
 using System.Diagnostics;
 
 namespace AutoRefreshHDR
@@ -7,16 +8,10 @@ namespace AutoRefreshHDR
     {
         static void Main(string[] args)
         {
-            IEnumerable<ProgramDisplayConfig> programDisplayConfigs =
-            [
-                new ProgramDisplayConfig { ProgramName = "Diablo IV.exe", refreshRate = 144, Hdr = true },
-                new ProgramDisplayConfig { ProgramName = "pcsx2-qt.exe", refreshRate = 144},
-                new ProgramDisplayConfig { ProgramName = "pcsx2-qt.exe", refreshRate = 144 },
-                new ProgramDisplayConfig { ProgramName = "snes9x-x64.exe", refreshRate = 60 },
-                new ProgramDisplayConfig { ProgramName = "Cemu.exe", refreshRate = 144 },
-            ];
+            var currentDirectory = AppContext.BaseDirectory;
+            var configFilePath = Path.Combine(currentDirectory, "appsettings.json");
 
-            DisplayConfig displayConfig = new DisplayConfig { CurrentRefreshRate = 120 };
+            DisplayConfig displayConfig = JsonConvert.DeserializeObject<DisplayConfig>(File.ReadAllText(configFilePath)) ?? new DisplayConfig();
 
             bool hdrActivated = false;
             bool refreshRateChange = false;
@@ -26,7 +21,7 @@ namespace AutoRefreshHDR
                 Console.WriteLine("Checking for the execution of any program in the list...");
                 while (true)
                 {
-                    foreach (var programDisplayConfig in programDisplayConfigs)
+                    foreach (var programDisplayConfig in displayConfig.ProgramDisplayConfigs)
                     {
                         if (Process.GetProcessesByName(programDisplayConfig.ProgramName.Replace(".exe", "")).Length != 0)
                         {
