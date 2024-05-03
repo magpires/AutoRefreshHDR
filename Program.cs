@@ -10,16 +10,15 @@ namespace AutoRefreshHDR
         {
             try
             {
-                var configFilePath = Path.Combine(AppContext.BaseDirectory, "appsettings.json");
-
-                DisplayConfig displayConfig = JsonConvert.DeserializeObject<DisplayConfig>(File.ReadAllText(configFilePath)) ?? new DisplayConfig();
-
                 bool hdrActivated = false;
                 bool refreshRateChange = false;
 
                 Console.WriteLine("Checking for the execution of any program in the list...");
                 while (true)
                 {
+                    var configFilePath = Path.Combine(AppContext.BaseDirectory, "appsettings.json");
+                    DisplayConfig displayConfig = JsonConvert.DeserializeObject<DisplayConfig>(File.ReadAllText(configFilePath)) ?? new DisplayConfig();
+
                     foreach (var programDisplayConfig in displayConfig.ProgramDisplayConfigs)
                     {
                         if (Process.GetProcessesByName(programDisplayConfig.ProgramName.Replace(".exe", "")).Length != 0)
