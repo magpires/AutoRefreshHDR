@@ -1,5 +1,7 @@
 ﻿using AutoRefreshHDR.Models;
+using Hanssens.Net;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.Diagnostics;
 
 namespace AutoRefreshHDR
@@ -13,6 +15,14 @@ namespace AutoRefreshHDR
                 bool hdrActivated = false;
                 bool refreshRateChange = false;
                 int currentRefreshRate = GetCurrentRefreshRate();
+                int currentRefreshRatePersisted = GetCurrentRefreshRatePersisted();
+
+                if (currentRefreshRatePersisted > 0 && currentRefreshRatePersisted != currentRefreshRate)
+                {
+                    ChangeRefreshRate(currentRefreshRatePersisted);
+                    currentRefreshRate = currentRefreshRatePersisted;
+                    DeleteRefreshRatePersisted();
+                }
 
                 Console.WriteLine("Checking for the execution of any program in the list...");
                 while (true)
@@ -27,6 +37,7 @@ namespace AutoRefreshHDR
                             Console.ForegroundColor = ConsoleColor.Green;
                             Console.WriteLine($"Program {programDisplayConfig.ProgramName} is running. Applying changes...");
                             Console.ResetColor();
+                            PersistCurrentRefreshRate(currentRefreshRate);
                             ChangeRefreshRate(programDisplayConfig.refreshRate);
                             refreshRateChange = true;
 
@@ -47,7 +58,10 @@ namespace AutoRefreshHDR
                                 HDRSwitchOff();
 
                             if (refreshRateChange)
+                            {
                                 ChangeRefreshRate(currentRefreshRate);
+                                DeleteRefreshRatePersisted();
+                            }
 
                             hdrActivated = false;
                             refreshRateChange = false;
@@ -162,6 +176,37 @@ namespace AutoRefreshHDR
                 }
 
                 return currentRefreshRate;
+            }
+        }
+
+        public static void PersistCurrentRefreshRate(int currentRefreshRate)
+        {
+            using (var storage = new LocalStorage())
+            {
+                storage.Clear();
+                storage.Store("refreshRate", currentRefreshRate);
+                storage.Persist();
+            }
+        }
+
+        public static int GetCurrentRefreshRatePersisted()
+        {
+            using (var storage = new LocalStorage())
+            {
+                if (storage.Count > 0)
+                {
+                    var refreshRatetring = storage.Get("refreshRate").ToString();
+                    return int.Parse(refreshRatetring ?? "0");;
+                }
+                return 0;
+            }
+        }
+
+        public static void DeleteRefreshRatePersisted()
+        {
+            using (var storage = new LocalStorage())
+            {
+                storage.Clear();
             }
         }
     }
