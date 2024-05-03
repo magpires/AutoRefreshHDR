@@ -12,6 +12,7 @@ namespace AutoRefreshHDR
             {
                 bool hdrActivated = false;
                 bool refreshRateChange = false;
+                int currentRefreshRate = GetCurrentRefreshRate();
 
                 Console.WriteLine("Checking for the execution of any program in the list...");
                 while (true)
@@ -46,7 +47,7 @@ namespace AutoRefreshHDR
                                 HDRSwitchOff();
 
                             if (refreshRateChange)
-                                ChangeRefreshRate(displayConfig.CurrentRefreshRate);
+                                ChangeRefreshRate(currentRefreshRate);
 
                             hdrActivated = false;
                             refreshRateChange = false;
@@ -134,6 +135,37 @@ namespace AutoRefreshHDR
             foreach (Process proc in Process.GetProcessesByName("hdr_switch_tray"))
             {
                 proc.Kill();
+            }
+        }
+
+        static int GetCurrentRefreshRate()
+        {
+            var pathToQRes = Path.Combine(AppContext.BaseDirectory, "Utils", "QRes.exe");
+
+            ProcessStartInfo startInfo = new ProcessStartInfo
+            {
+                FileName = pathToQRes,
+                Arguments = $"/c QRes /s",
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
+            };
+
+            using (Process? process = Process.Start(startInfo))
+            {
+                string output = process.StandardOutput.ReadToEnd();
+                string error = process.StandardError.ReadToEnd();
+                string[] outputSplited = output.Split('@');
+                int currentRefreshRate = int.Parse(outputSplited[1].Trim().Replace(" Hz.", ""));
+
+                if (string.IsNullOrEmpty(error) == false)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"Error getting refresh rate: {error}");
+                    Console.ResetColor();
+                }
+
+                return currentRefreshRate;
             }
         }
     }
