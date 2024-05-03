@@ -52,8 +52,8 @@ namespace AutoRefreshHDR
                             hdrActivated = false;
                             refreshRateChange = false;
                         }
-                        Thread.Sleep(1000);
                     }
+                    Thread.Sleep(1000);
                 }
             }
             catch (Exception e)
