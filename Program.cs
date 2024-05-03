@@ -84,8 +84,6 @@ namespace AutoRefreshHDR
                 string output = process.StandardOutput.ReadToEnd();
                 string error = process.StandardError.ReadToEnd();
 
-                process.WaitForExit();
-
                 Console.WriteLine(output);
                 if (string.IsNullOrEmpty(error) == false)
                 {
@@ -117,8 +115,6 @@ namespace AutoRefreshHDR
             {
                 string output = process.StandardOutput.ReadToEnd();
                 string error = process.StandardError.ReadToEnd();
-
-                process.WaitForExit();
 
                 Console.WriteLine(output);
                 if (string.IsNullOrEmpty(error) == false)
