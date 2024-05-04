@@ -1,7 +1,6 @@
 ﻿using AutoRefreshHDR.Models;
 using Hanssens.Net;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System.Diagnostics;
 
 namespace AutoRefreshHDR
@@ -72,9 +71,7 @@ namespace AutoRefreshHDR
             }
             catch (Exception e)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"{e}");
-                Console.ResetColor();
+                MessageBox.Show(e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -96,14 +93,12 @@ namespace AutoRefreshHDR
             using (Process? process = Process.Start(startInfo))
             {
                 string output = process.StandardOutput.ReadToEnd();
-                string error = process.StandardError.ReadToEnd();
+                string error = output.Contains("Error") ? output : "";
 
                 Console.WriteLine(output);
                 if (string.IsNullOrEmpty(error) == false)
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine($"Error changing refresh rate: {error}");
-                    Console.ResetColor();
+                    MessageBox.Show(error, "Error changing refresh rate", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
         }
