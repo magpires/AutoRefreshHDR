@@ -16,6 +16,9 @@
     <None Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="RestartAutoRefreshHDR.bat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Utils\hdr_switch_tray.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
