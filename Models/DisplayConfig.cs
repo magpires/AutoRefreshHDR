@@ -8,7 +8,6 @@ namespace AutoRefreshHDR.Models
 {
     public class DisplayConfig
     {
-        public int CurrentRefreshRate { get; set; }
         public List<ProgramDisplayConfig> ProgramDisplayConfigs { get; set; } = new List<ProgramDisplayConfig>();
     }
 }
