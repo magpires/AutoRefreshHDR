@@ -123,14 +123,12 @@ namespace AutoRefreshHDR
             using (Process? process = Process.Start(startInfo))
             {
                 string output = process.StandardOutput.ReadToEnd();
-                string error = process.StandardError.ReadToEnd();
+                string error = output.Contains("Error") ? output : "";
 
                 Console.WriteLine(output);
                 if (string.IsNullOrEmpty(error) == false)
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine($"error switching HDR: {error}");
-                    Console.ResetColor();
+                    MessageBox.Show(error, "Error switching HDR", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
         }
