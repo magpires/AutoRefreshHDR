@@ -1,6 +1,6 @@
 ﻿using AutoRefreshHDR.Models;
 using Hanssens.Net;
-using Newtonsoft.Json;
+using Microsoft.Extensions.Configuration;
 using System.Diagnostics;
 
 namespace AutoRefreshHDR
@@ -23,13 +23,16 @@ namespace AutoRefreshHDR
                     DeleteRefreshRatePersisted();
                 }
 
-                var configFilePath = Path.Combine(AppContext.BaseDirectory, "appsettings.json");
-                DisplayConfig displayConfig = JsonConvert.DeserializeObject<DisplayConfig>(File.ReadAllText(configFilePath)) ?? new DisplayConfig();
+                IConfigurationRoot configuration = new ConfigurationBuilder()
+                    .AddJsonFile("appsettings.json", false, true)
+                    .Build();
+
+                DisplayConfig displayConfig = configuration.Get<DisplayConfig>() ?? new DisplayConfig();
 
                 Console.WriteLine("Checking for the execution of any program in the list...");
                 while (true)
                 {
-                    foreach (var programDisplayConfig in displayConfig.ProgramDisplayConfigs)
+                    foreach (ProgramDisplayConfig programDisplayConfig in displayConfig.ProgramDisplayConfigs)
                     {
                         if (Process.GetProcessesByName(programDisplayConfig.ProgramName.Replace(".exe", "")).Length != 0)
                         {
@@ -79,7 +82,7 @@ namespace AutoRefreshHDR
         {
             Console.WriteLine($"Refresh rate changed to: {refreshRate} Hz.");
 
-            var pathToQRes = Path.Combine(AppContext.BaseDirectory, "Utils", "QRes.exe");
+            string pathToQRes = Path.Combine(AppContext.BaseDirectory, "Utils", "QRes.exe");
 
             ProcessStartInfo startInfo = new ProcessStartInfo
             {
@@ -90,7 +93,7 @@ namespace AutoRefreshHDR
                 RedirectStandardError = true
             };
 
-            using (Process? process = Process.Start(startInfo))
+            using (Process process = Process.Start(startInfo) ?? new Process())
             {
                 string output = process.StandardOutput.ReadToEnd();
                 string error = output.Contains("Error") ? output : "";
@@ -105,7 +108,7 @@ namespace AutoRefreshHDR
 
         static void HDRSwitchOn()
         {
-            var pathToHdrSwitchTry = Path.Combine(AppContext.BaseDirectory, "Utils", "hdr_switch_tray.exe");
+            string pathToHdrSwitchTry = Path.Combine(AppContext.BaseDirectory, "Utils", "hdr_switch_tray.exe");
 
             using (Process? initialProcess = Process.Start(pathToHdrSwitchTry))
             {
@@ -120,7 +123,7 @@ namespace AutoRefreshHDR
                 RedirectStandardError = true
             };
 
-            using (Process? process = Process.Start(startInfo))
+            using (Process process = Process.Start(startInfo) ?? new Process())
             {
                 string output = process.StandardOutput.ReadToEnd();
                 string error = output.Contains("Error") ? output : "";
@@ -143,7 +146,7 @@ namespace AutoRefreshHDR
 
         static int GetCurrentRefreshRate()
         {
-            var pathToQRes = Path.Combine(AppContext.BaseDirectory, "Utils", "QRes.exe");
+            string pathToQRes = Path.Combine(AppContext.BaseDirectory, "Utils", "QRes.exe");
 
             ProcessStartInfo startInfo = new ProcessStartInfo
             {
@@ -154,7 +157,7 @@ namespace AutoRefreshHDR
                 RedirectStandardError = true
             };
 
-            using (Process? process = Process.Start(startInfo))
+            using (Process process = Process.Start(startInfo) ?? new Process())
             {
                 string output = process.StandardOutput.ReadToEnd();
                 string error = process.StandardError.ReadToEnd();
@@ -174,7 +177,7 @@ namespace AutoRefreshHDR
 
         public static void PersistCurrentRefreshRate(int currentRefreshRate)
         {
-            using (var storage = new LocalStorage())
+            using (LocalStorage storage = new LocalStorage())
             {
                 storage.Clear();
                 storage.Store("refreshRate", currentRefreshRate);
@@ -184,12 +187,12 @@ namespace AutoRefreshHDR
 
         public static int GetCurrentRefreshRatePersisted()
         {
-            using (var storage = new LocalStorage())
+            using (LocalStorage storage = new LocalStorage())
             {
                 if (storage.Count > 0)
                 {
-                    var refreshRatetring = storage.Get("refreshRate").ToString();
-                    return int.Parse(refreshRatetring ?? "0");;
+                    string? refreshRatetring = storage.Get("refreshRate").ToString();
+                    return int.Parse(refreshRatetring ?? "0"); ;
                 }
                 return 0;
             }
@@ -197,7 +200,7 @@ namespace AutoRefreshHDR
 
         public static void DeleteRefreshRatePersisted()
         {
-            using (var storage = new LocalStorage())
+            using (LocalStorage storage = new LocalStorage())
             {
                 storage.Clear();
             }
