@@ -50,7 +50,7 @@ A crucial and important file, which makes the magic happen, is ```appsettings.js
 
 Make the necessary modifications and then save this file. Once that's done, now just run the ```AutoRefreshHDR.exe``` file and it will take care of the rest.
 
-#### I made a modification to the ```appsettings.json``` file. How to make the tool see the new changes?
+### I made a modification to the ```appsettings.json``` file. How to make the tool see the new changes?
 
 It's quite simple. To do this, simply run the ```RestartAutoRefreshHDR.bat``` script which will reinitialize the tool and, therefore, apply the new changes.
 
@@ -62,7 +62,7 @@ There are two ways to do this:
 
 2. Run ```KillAutoRefreshHDR.bat```. Unlike ```RestartAutoRefreshHDR.bat```, this script terminates the process and does not start it again. If you want to run the tool again, just start it again using the file ```AutoRefreshHDR.exe```.
 
-#### Usability tip
+### Usability tip
 
 You can, if you prefer, configure the tool to start alongside Windows, eliminating the need to run it before running your configured games or applications. To do this, simply create a shortcut and paste it in the ```%ProgramData%\Microsoft\Windows\Start Menu\Programs\StartUp``` directory, if you want the tool to start for all users, or in the ```% directory AppData%\Microsoft\Windows\Start Menu\Programs\Startup```, if you want the tool to start only for the logged in user in question.
 
