@@ -23,7 +23,7 @@ First of all, extract the tool to any folder on your computer. When extracting t
 
 A crucial and important file, which makes the magic happen, is ```appsettings.json```. In it, you will tell the tool the screen refresh rate setting you want to use and, also, whether you want to activate the screen's HDR for the desired game or application. You can open this file with Windows Notepad or, if you prefer, with a code editor. When you open the file, you will see the following code.
 
-```json
+```jsonc
 {
   // Fill in the ProgramDisplayConfigs property with the settings for your programs, as shown in the examples
   // To apply the changes, run the RestartAutoRefreshHDR.bat file.
