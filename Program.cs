@@ -11,6 +11,7 @@ namespace AutoRefreshHDR
         {
             try
             {
+                Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.Idle;
                 bool hdrActivated = false;
                 bool refreshRateChange = false;
                 int currentRefreshRate = GetCurrentRefreshRate();
