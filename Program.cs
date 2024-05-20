@@ -30,8 +30,15 @@ namespace AutoRefreshHDR
 
                 DisplayConfig displayConfig = configuration.Get<DisplayConfig>() ?? new DisplayConfig();
 
+                var processCount = Process.GetProcesses().Length;
+
                 while (true)
                 {
+                    while(processCount == Process.GetProcesses().Length)
+                        Thread.Sleep(1000);
+
+                    processCount = Process.GetProcesses().Length;
+
                     foreach (ProgramDisplayConfig programDisplayConfig in displayConfig.ProgramDisplayConfigs)
                     {
                         if (Process.GetProcessesByName(programDisplayConfig.ProgramName.Replace(".exe", "")).Length != 0)
@@ -64,7 +71,6 @@ namespace AutoRefreshHDR
                             refreshRateChange = false;
                         }
                     }
-                    Thread.Sleep(1000);
                 }
             }
             catch (Exception e)
