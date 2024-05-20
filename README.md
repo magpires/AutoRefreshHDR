@@ -1,4 +1,4 @@
-# Dynamic Display Manager
+# Auto Refresh HDR
 
 ## Presentation
 Dynamic Display Manager is a powerful and efficient tool designed for gamers and users who demand the most from their display systems. This C# tool allows automatic customization of display settings, including refresh rate and HDR, based on running specific applications. This is possible because, after informing the tool of the name of the applications and settings you want to use for them, it will "listen" to your processes, changing the settings every time the informed application is detected. When the application or game is closed, the tool will naturally restore the monitor settings to what they were before.
