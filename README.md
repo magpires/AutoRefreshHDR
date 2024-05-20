@@ -11,7 +11,7 @@ change the HDR and refresh rate of the monitor. Furthermore, graphics card utili
 To use this tool, some prerequisites need to be met. Are they:
 
 * .Net Core 8.0 installed on your machine. Available [HERE](https://dotnet.microsoft.com/download/dotnet/8.0).
-* Windows 10 or higher.
+* Windows 10 or higher (x64).
 
 ## How to use the tool?
 
