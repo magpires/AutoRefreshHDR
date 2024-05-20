@@ -54,7 +54,7 @@ Make the necessary modifications and then save this file. Once that's done, now 
 
 It's quite simple. To do this, simply run the ```RestartAutoRefreshHDR.bat``` script which will reinitialize the tool and, therefore, apply the new changes.
 
-#### I no longer want the tool to change my monitor settings, according to the applications configured in ```appsettings.json```. How do I do?
+### I no longer want the tool to change my monitor settings, according to the applications configured in ```appsettings.json```. How do I do?
 
 There are two ways to do this:
 
