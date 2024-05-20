@@ -2,6 +2,6 @@
 {
     public class DisplayConfig
     {
-        public List<ProgramDisplayConfig> ProgramDisplayConfigs { get; set; } = new List<ProgramDisplayConfig>();
+        public ICollection<ProgramDisplayConfig> ProgramDisplayConfigs { get; set; } = [];
     }
 }

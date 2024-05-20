@@ -29,23 +29,18 @@ namespace AutoRefreshHDR
 
                 DisplayConfig displayConfig = configuration.Get<DisplayConfig>() ?? new DisplayConfig();
 
-                Console.WriteLine("Checking for the execution of any program in the list...");
                 while (true)
                 {
                     foreach (ProgramDisplayConfig programDisplayConfig in displayConfig.ProgramDisplayConfigs)
                     {
                         if (Process.GetProcessesByName(programDisplayConfig.ProgramName.Replace(".exe", "")).Length != 0)
                         {
-                            Console.ForegroundColor = ConsoleColor.Green;
-                            Console.WriteLine($"Program {programDisplayConfig.ProgramName} is running. Applying changes...");
-                            Console.ResetColor();
                             PersistCurrentRefreshRate(currentRefreshRate);
                             ChangeRefreshRate(programDisplayConfig.refreshRate);
                             refreshRateChange = true;
 
                             if (programDisplayConfig.Hdr && hdrActivated == false)
                             {
-                                Console.WriteLine($"Activating HDR for {programDisplayConfig.ProgramName}...");
                                 HDRSwitchOn();
                                 hdrActivated = true;
                             }
@@ -55,7 +50,6 @@ namespace AutoRefreshHDR
 
                         if (hdrActivated || refreshRateChange)
                         {
-                            Console.WriteLine($"All programs are closed. Restoring settings...");
                             if (hdrActivated)
                                 HDRSwitchOff();
 
@@ -80,8 +74,6 @@ namespace AutoRefreshHDR
 
         static void ChangeRefreshRate(int refreshRate)
         {
-            Console.WriteLine($"Refresh rate changed to: {refreshRate} Hz.");
-
             string pathToQRes = Path.Combine(AppContext.BaseDirectory, "Utils", "QRes.exe");
 
             ProcessStartInfo startInfo = new ProcessStartInfo
@@ -98,7 +90,6 @@ namespace AutoRefreshHDR
                 string output = process.StandardOutput.ReadToEnd();
                 string error = output.Contains("Error") ? output : "";
 
-                Console.WriteLine(output);
                 if (string.IsNullOrEmpty(error) == false)
                 {
                     MessageBox.Show(error, "Error changing refresh rate", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -128,7 +119,6 @@ namespace AutoRefreshHDR
                 string output = process.StandardOutput.ReadToEnd();
                 string error = output.Contains("Error") ? output : "";
 
-                Console.WriteLine(output);
                 if (string.IsNullOrEmpty(error) == false)
                 {
                     MessageBox.Show(error, "Error switching HDR", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -166,9 +156,7 @@ namespace AutoRefreshHDR
 
                 if (string.IsNullOrEmpty(error) == false)
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine($"Error getting refresh rate: {error}");
-                    Console.ResetColor();
+                    MessageBox.Show(error, "Error getting current refresh rate", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
 
                 return currentRefreshRate;
