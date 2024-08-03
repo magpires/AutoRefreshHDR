@@ -89,7 +89,9 @@ namespace AutoRefreshHDR
                 Arguments = $"/c QRes /r:{refreshRate}",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
-                RedirectStandardError = true
+                RedirectStandardError = true,
+                CreateNoWindow = true,
+                WindowStyle = ProcessWindowStyle.Hidden
             };
 
             using (Process process = Process.Start(startInfo) ?? new Process())
