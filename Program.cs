@@ -120,7 +120,9 @@ namespace AutoRefreshHDR
                 Arguments = "hdr",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
-                RedirectStandardError = true
+                RedirectStandardError = true,
+                CreateNoWindow = true,
+                WindowStyle = ProcessWindowStyle.Hidden
             };
 
             using (Process process = Process.Start(startInfo) ?? new Process())
