@@ -2,6 +2,6 @@
 {
     public class DisplayConfig
     {
-        public ICollection<ProgramDisplayConfig> ProgramDisplayConfigs { get; set; } = [];
+        public ProgramDisplayConfig[] ProgramDisplayConfigs { get; set; } = Array.Empty<ProgramDisplayConfig>();
     }
 }
