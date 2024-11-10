@@ -13,24 +13,27 @@ namespace AutoRefreshHDR
             {
                 Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.Idle;
 
+                IConfigurationRoot configuration = new ConfigurationBuilder()
+                    .AddJsonFile("appsettings.json", false, true)
+                    .Build();
+
+                DisplayConfig displayConfig = configuration.Get<DisplayConfig>() ?? new DisplayConfig();
+
+                if (displayConfig.UseAutoRefreshRate == false && displayConfig.UseAutoHDR == false)
+                    Environment.Exit(0);
+
                 int processCount = 0;
                 bool hdrActivated = false;
                 bool refreshRateChange = false;
                 int currentRefreshRate = GetCurrentRefreshRate();
                 int currentRefreshRatePersisted = GetCurrentRefreshRatePersisted();
 
-                if (currentRefreshRatePersisted > 0 && currentRefreshRatePersisted != currentRefreshRate)
+                if (displayConfig.UseAutoRefreshRate && currentRefreshRatePersisted > 0 && currentRefreshRatePersisted != currentRefreshRate)
                 {
                     ChangeRefreshRate(currentRefreshRatePersisted);
                     currentRefreshRate = currentRefreshRatePersisted;
                     DeleteRefreshRatePersisted();
                 }
-
-                IConfigurationRoot configuration = new ConfigurationBuilder()
-                    .AddJsonFile("appsettings.json", false, true)
-                    .Build();
-
-                DisplayConfig displayConfig = configuration.Get<DisplayConfig>() ?? new DisplayConfig();
 
                 while (true)
                 {
@@ -43,11 +46,14 @@ namespace AutoRefreshHDR
                     {
                         if (Process.GetProcessesByName(programDisplayConfig.ProgramName.Replace(".exe", "")).Length != 0)
                         {
-                            PersistCurrentRefreshRate(currentRefreshRate);
-                            ChangeRefreshRate(programDisplayConfig.refreshRate);
-                            refreshRateChange = true;
+                            if (displayConfig.UseAutoRefreshRate)
+                            {
+                                PersistCurrentRefreshRate(currentRefreshRate);
+                                ChangeRefreshRate(programDisplayConfig.refreshRate);
+                                refreshRateChange = true;
+                            }
 
-                            if (programDisplayConfig.Hdr && hdrActivated == false)
+                            if (displayConfig.UseAutoHDR && programDisplayConfig.Hdr && hdrActivated == false)
                             {
                                 HDRSwitchOn();
                                 hdrActivated = true;
