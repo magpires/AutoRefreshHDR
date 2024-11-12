@@ -64,10 +64,10 @@ namespace AutoRefreshHDR
 
                         if (hdrActivated || refreshRateChange)
                         {
-                            if (hdrActivated)
+                            if (displayConfig.UseAutoHDR && hdrActivated)
                                 HDRSwitchOff();
 
-                            if (refreshRateChange)
+                            if (displayConfig.UseAutoRefreshRate && refreshRateChange)
                             {
                                 ChangeRefreshRate(currentRefreshRate);
                                 DeleteRefreshRatePersisted();
