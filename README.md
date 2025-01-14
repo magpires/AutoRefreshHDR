@@ -21,7 +21,7 @@ First of all, extract the tool to any folder on your computer. When extracting t
 
 ![Tool Folder Structure](imgs/tool_folder_structure.png)
 
-A crucial and important file, which makes the magic happen, is ```appsettings.json```. In it, you will tell the tool the screen refresh rate setting you want to use and, also, whether you want to activate the screen's HDR for the desired game or application. You can open this file with Windows Notepad or, if you prefer, with a code editor. When you open the file, you will see the following code.
+A crucial and important file, which makes the magic happen, is appsettings.json. In it, you will tell the tool the screen refresh rate setting you want to use and, also, whether you want to activate the screen's HDR for the desired game or application. Additionally, you can make a global setting to decide whether the tool will use auto refresh rate and/or auto HDR in all defined games or applications. You can open this file with Windows Notepad or, if you prefer, with a code editor. When you open the file, you will see the following code
 
 ```jsonc
 {
@@ -43,7 +43,9 @@ A crucial and important file, which makes the magic happen, is ```appsettings.js
       "RefreshRate": 144,
       "Hdr": false
     }
-  ]
+  ],
+  "UseAutoRefreshRate": true, // Set to true if you want to use auto refresh rate. Applies to all defined programs.
+  "UseAutoHDR": true // Set to true if you want to use auto HDR. Applies to all defined programs.
 }
 
 ```
@@ -70,6 +72,7 @@ You can, if you prefer, configure the tool to start alongside Windows, eliminati
 
 * The tool will not overclock the monitor. Any and all settings defined in the ```appsettings.json``` file will only be applied if your monitor and/or video card supports it.
 * If any setting, be it refresh rate or HDR, is not supported by your system, a warning message will be displayed as soon as the application configured with the incompatible attributes is run.
+* If dynamic refresh rate is enabled in your operating system, Auto Refresh HDR will disable it as soon as you run the configured game or program. I'm still looking for a way to prevent this behavior, but until I find one, I recommend setting the value of the new UseAutoRefreshRate property to false.
 
 ## Final considerations
 
