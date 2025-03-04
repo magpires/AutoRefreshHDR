@@ -1,14 +1,16 @@
 ﻿using AutoRefreshHDR.Models;
+using AutoRefreshHDR.Services;
 using Hanssens.Net;
 using Microsoft.Extensions.Configuration;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace AutoRefreshHDR
 {
     internal class Program
     {
         static void Main(string[] args)
-        {
+        {            
             try
             {
                 Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.Idle;
@@ -25,12 +27,12 @@ namespace AutoRefreshHDR
                 int processCount = 0;
                 bool hdrActivated = false;
                 bool refreshRateChange = false;
-                int currentRefreshRate = GetCurrentRefreshRate();
+                int currentRefreshRate = DisplaySettingsManagerService.GetCurrentRefreshRate();
                 int currentRefreshRatePersisted = GetCurrentRefreshRatePersisted();
 
                 if (displayConfig.UseAutoRefreshRate && currentRefreshRatePersisted > 0 && currentRefreshRatePersisted != currentRefreshRate)
                 {
-                    ChangeRefreshRate(currentRefreshRatePersisted);
+                    DisplaySettingsManagerService.ChangeRefreshRate(currentRefreshRatePersisted);
                     currentRefreshRate = currentRefreshRatePersisted;
                     DeleteRefreshRatePersisted();
                 }
@@ -49,7 +51,7 @@ namespace AutoRefreshHDR
                             if (displayConfig.UseAutoRefreshRate)
                             {
                                 PersistCurrentRefreshRate(currentRefreshRate);
-                                ChangeRefreshRate(programDisplayConfig.refreshRate);
+                                DisplaySettingsManagerService.ChangeRefreshRate(programDisplayConfig.refreshRate);
                                 refreshRateChange = true;
                             }
 
@@ -69,7 +71,7 @@ namespace AutoRefreshHDR
 
                             if (displayConfig.UseAutoRefreshRate && refreshRateChange)
                             {
-                                ChangeRefreshRate(currentRefreshRate);
+                                DisplaySettingsManagerService.ChangeRefreshRate(currentRefreshRate);
                                 DeleteRefreshRatePersisted();
                             }
 
@@ -82,33 +84,6 @@ namespace AutoRefreshHDR
             catch (Exception e)
             {
                 MessageBox.Show(e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        static void ChangeRefreshRate(int refreshRate)
-        {
-            string pathToQRes = Path.Combine(AppContext.BaseDirectory, "Utils", "QRes.exe");
-
-            ProcessStartInfo startInfo = new ProcessStartInfo
-            {
-                FileName = pathToQRes,
-                Arguments = $"/c QRes /r:{refreshRate}",
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                CreateNoWindow = true,
-                WindowStyle = ProcessWindowStyle.Hidden
-            };
-
-            using (Process process = Process.Start(startInfo) ?? new Process())
-            {
-                string output = process.StandardOutput.ReadToEnd();
-                string error = output.Contains("Error") ? output : "";
-
-                if (string.IsNullOrEmpty(error) == false)
-                {
-                    MessageBox.Show(error, "Error changing refresh rate", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
             }
         }
 
@@ -148,37 +123,6 @@ namespace AutoRefreshHDR
             foreach (Process proc in Process.GetProcessesByName("hdr_switch_tray"))
             {
                 proc.Kill();
-            }
-        }
-
-        static int GetCurrentRefreshRate()
-        {
-            string pathToQRes = Path.Combine(AppContext.BaseDirectory, "Utils", "QRes.exe");
-
-            ProcessStartInfo startInfo = new ProcessStartInfo
-            {
-                FileName = pathToQRes,
-                Arguments = $"/c QRes /s",
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                CreateNoWindow = true,
-                WindowStyle = ProcessWindowStyle.Hidden
-            };
-
-            using (Process process = Process.Start(startInfo) ?? new Process())
-            {
-                string output = process.StandardOutput.ReadToEnd();
-                string error = process.StandardError.ReadToEnd();
-                string[] outputSplited = output.Split('@');
-                int currentRefreshRate = int.Parse(outputSplited[1].Trim().Replace(" Hz.", ""));
-
-                if (string.IsNullOrEmpty(error) == false)
-                {
-                    MessageBox.Show(error, "Error getting current refresh rate", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-
-                return currentRefreshRate;
             }
         }
 
