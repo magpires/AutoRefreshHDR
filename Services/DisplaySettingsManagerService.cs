@@ -1,18 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using static AutoRefreshHDR.Models.DisplaySettingsManager;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AutoRefreshHDR.Services
 {
     public class DisplaySettingsManagerService
     {
-
-
         [DllImport("user32.dll", CharSet = CharSet.Ansi)]
         private static extern bool EnumDisplaySettings(string? deviceName, int modeNum, ref DEVMODE devMode);
 
@@ -75,6 +68,51 @@ namespace AutoRefreshHDR.Services
             else
             {
                 MessageBox.Show($"The refresh rate {newRefreshRate} Hz is not supported.", "Error changing refresh rate", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        /// <summary>
+        /// Enable HDR via hdr_switch_tray.
+        /// </summary>
+        public static void HDRSwitchOn()
+        {
+            string pathToHdrSwitchTry = Path.Combine(AppContext.BaseDirectory, "Utils", "hdr_switch_tray.exe");
+
+            using (Process? initialProcess = Process.Start(pathToHdrSwitchTry))
+            {
+            }
+
+            ProcessStartInfo startInfo = new ProcessStartInfo
+            {
+                FileName = pathToHdrSwitchTry,
+                Arguments = "hdr",
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true,
+                WindowStyle = ProcessWindowStyle.Hidden
+            };
+
+            using (Process process = Process.Start(startInfo) ?? new Process())
+            {
+                string output = process.StandardOutput.ReadToEnd();
+                string error = output.Contains("Error") ? output : "";
+
+                if (string.IsNullOrEmpty(error) == false)
+                {
+                    MessageBox.Show(error, "Error switching HDR", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Disable HDR when shutting down the hdr switch tray.
+        /// </summary>
+        public static void HDRSwitchOff()
+        {
+            foreach (Process proc in Process.GetProcessesByName("hdr_switch_tray"))
+            {
+                proc.Kill();
             }
         }
     }
