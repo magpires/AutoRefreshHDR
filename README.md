@@ -80,10 +80,11 @@ I believe that the tool is very necessary for the community, especially the gami
 
 ## Additional information and credits
 
-This tool works in conjunction with two other tools, **hdr_switch_tray**, which aims to change the system's HDR, and **QRes.exe**, which allows you to change the monitor's refresh rate. I am grateful to the developers and I will leave links to the source code of the projects below, giving them due credit.
+This tool works in conjunction with other tool, **hdr_switch_tray**, which aims to change the system's HDR. I am grateful to the developers and I will leave link to the source code of the project below, giving them due credit.
 
-- **QRes:** https://sourceforge.net/projects/qres/
 - **hdr_switch_tray**: https://github.com/bradgearon/hdr-switch
+
+**Note:** after version 1.1.2, all changes made to the monitor refresh rate are being made directly by AutoRefreshRate, no longer requiring QRes as an intermediary. This gives me better control over the code and what happens to it. For the end user, this change does not cause major impacts, but for the development of the tool itself, it improves a lot.
 
 
 
