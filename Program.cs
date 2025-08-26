@@ -1,121 +1,123 @@
-﻿using AutoRefreshHDR.Models;
+﻿using System.Diagnostics;
+using AutoRefreshHDR.Models;
 using AutoRefreshHDR.Services;
 using Hanssens.Net;
 using Microsoft.Extensions.Configuration;
-using System.Diagnostics;
 
-namespace AutoRefreshHDR
+namespace AutoRefreshHDR;
+
+internal abstract class Program
 {
-    internal abstract class Program
+    private static void Main()
     {
-        private static void Main()
-        {            
-            try
+        var processCount = 0;
+
+        try
+        {
+            Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.Idle;
+
+            var configuration = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.jsonc", false, true)
+                .Build();
+
+            var displayConfig = configuration.Get<DisplayConfig>() ?? new DisplayConfig();
+
+            if (displayConfig is { UseAutoRefreshRate: false, UseAutoHDR: false })
+                Environment.Exit(0);
+
+            var hdrActivated = false;
+            var refreshRateChange = false;
+            var currentRefreshRate = DisplaySettingsManagerService.GetCurrentRefreshRate();
+            var currentRefreshRatePersisted = GetCurrentRefreshRatePersisted();
+
+            if (displayConfig.UseAutoRefreshRate && currentRefreshRatePersisted > 0 &&
+                currentRefreshRatePersisted != currentRefreshRate)
             {
-                Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.Idle;
+                DisplaySettingsManagerService.ChangeRefreshRate(currentRefreshRatePersisted);
+                currentRefreshRate = currentRefreshRatePersisted;
+                DeleteRefreshRatePersisted();
+            }
 
-                IConfigurationRoot configuration = new ConfigurationBuilder()
-                    .AddJsonFile("appsettings.json", false, true)
-                    .Build();
+            while (true)
+            {
+                while (processCount == Process.GetProcesses().Length)
+                    Thread.Sleep(1000);
 
-                DisplayConfig displayConfig = configuration.Get<DisplayConfig>() ?? new DisplayConfig();
+                processCount = Process.GetProcesses().Length;
 
-                if (displayConfig is { UseAutoRefreshRate: false, UseAutoHDR: false })
-                    Environment.Exit(0);
-
-                int processCount = 0;
-                bool hdrActivated = false;
-                bool refreshRateChange = false;
-                int currentRefreshRate = DisplaySettingsManagerService.GetCurrentRefreshRate();
-                int currentRefreshRatePersisted = GetCurrentRefreshRatePersisted();
-
-                if (displayConfig.UseAutoRefreshRate && currentRefreshRatePersisted > 0 && currentRefreshRatePersisted != currentRefreshRate)
+                foreach (var programDisplayConfig in displayConfig.ProgramDisplayConfigs)
                 {
-                    DisplaySettingsManagerService.ChangeRefreshRate(currentRefreshRatePersisted);
-                    currentRefreshRate = currentRefreshRatePersisted;
-                    DeleteRefreshRatePersisted();
-                }
-
-                while (true)
-                {
-                    while(processCount == Process.GetProcesses().Length)
-                        Thread.Sleep(1000);
-
-                    processCount = Process.GetProcesses().Length;
-
-                    foreach (ProgramDisplayConfig programDisplayConfig in displayConfig.ProgramDisplayConfigs)
+                    if (Process.GetProcessesByName(programDisplayConfig.ProgramName.Replace(".exe", "")).Length != 0)
                     {
-                        if (Process.GetProcessesByName(programDisplayConfig.ProgramName.Replace(".exe", "")).Length != 0)
+                        if (displayConfig.UseAutoRefreshRate)
                         {
-                            if (displayConfig.UseAutoRefreshRate)
-                            {
-                                PersistCurrentRefreshRate(currentRefreshRate);
-                                DisplaySettingsManagerService.ChangeRefreshRate(programDisplayConfig.refreshRate);
-                                refreshRateChange = true;
-                            }
-
-                            if (displayConfig.UseAutoHDR && programDisplayConfig.Hdr && hdrActivated == false)
-                            {
-                                DisplaySettingsManagerService.HDRSwitchOn();
-                                hdrActivated = true;
-                            }
-                            while (Process.GetProcessesByName(programDisplayConfig.ProgramName.Replace(".exe", "")).Length != 0)
-                                Thread.Sleep(1000);
+                            PersistCurrentRefreshRate(currentRefreshRate);
+                            DisplaySettingsManagerService.ChangeRefreshRate(programDisplayConfig.refreshRate);
+                            refreshRateChange = true;
                         }
 
-                        if (hdrActivated || refreshRateChange)
+                        if (displayConfig.UseAutoHDR && programDisplayConfig.Hdr && !hdrActivated)
                         {
-                            if (displayConfig.UseAutoHDR && hdrActivated)
-                                DisplaySettingsManagerService.HDRSwitchOff();
-
-                            if (displayConfig.UseAutoRefreshRate && refreshRateChange)
-                            {
-                                DisplaySettingsManagerService.ChangeRefreshRate(currentRefreshRate);
-                                DeleteRefreshRatePersisted();
-                            }
-
-                            hdrActivated = false;
-                            refreshRateChange = false;
+                            DisplaySettingsManagerService.HdrSwitchOn();
+                            hdrActivated = true;
                         }
+
+                        while (Process.GetProcessesByName(programDisplayConfig.ProgramName.Replace(".exe", ""))
+                                   .Length != 0)
+                            Thread.Sleep(1000);
                     }
+
+                    if (!hdrActivated && !refreshRateChange) continue;
+
+                    if (displayConfig.UseAutoHDR && hdrActivated)
+                        DisplaySettingsManagerService.HdrSwitchOff();
+
+                    if (displayConfig.UseAutoRefreshRate && refreshRateChange)
+                    {
+                        DisplaySettingsManagerService.ChangeRefreshRate(currentRefreshRate);
+                        DeleteRefreshRatePersisted();
+                    }
+
+                    hdrActivated = false;
+                    refreshRateChange = false;
                 }
             }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
         }
-
-        /// <summary>
-        /// Persists the current refresh rate in LocalStorage.
-        /// </summary>
-        /// <param name="currentRefreshRate">The current refresh rate of the monitor.</param>
-        private static void PersistCurrentRefreshRate(int currentRefreshRate)
+        catch (Exception e)
         {
-            using LocalStorage storage = new LocalStorage();
-            storage.Clear();
-            storage.Store("refreshRate", currentRefreshRate);
-            storage.Persist();
+            MessageBox.Show(e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
+    }
 
-        /// <summary>
-        /// Gets the current refresh rate persisted in LocalStorage.
-        /// </summary>
-        private static int GetCurrentRefreshRatePersisted()
-        {
-            using var storage = new LocalStorage();
-            if (storage.Count <= 0) return 0;
-            var refreshRatetring = storage.Get("refreshRate").ToString();
-            return int.Parse(refreshRatetring ?? "0");
-        }
+    /// <summary>
+    ///     Persists the current refresh rate in LocalStorage.
+    /// </summary>
+    /// <param name="currentRefreshRate">The current refresh rate of the monitor.</param>
+    private static void PersistCurrentRefreshRate(int currentRefreshRate)
+    {
+        using var storage = new LocalStorage();
+        storage.Clear();
+        storage.Store("refreshRate", currentRefreshRate);
+        storage.Persist();
+    }
 
-        /// <summary>
-        /// Deletes the current refresh rate persisted in LocalStorage.
-        /// </summary>
-        private static void DeleteRefreshRatePersisted()
-        {
-            using var storage = new LocalStorage();
-            storage.Clear();
-        }
+    /// <summary>
+    ///     Gets the current refresh rate persisted in LocalStorage.
+    /// </summary>
+    private static int GetCurrentRefreshRatePersisted()
+    {
+        using var storage = new LocalStorage();
+        if (storage.Count <= 0) return 0;
+        var refreshRatetring = storage.Get("refreshRate").ToString();
+        return int.Parse(refreshRatetring ?? "0");
+    }
+
+    /// <summary>
+    ///     Deletes the current refresh rate persisted in LocalStorage.
+    /// </summary>
+    private static void DeleteRefreshRatePersisted()
+    {
+        using var storage = new LocalStorage();
+        storage.Clear();
     }
 }
