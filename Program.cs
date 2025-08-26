@@ -6,9 +6,9 @@ using System.Diagnostics;
 
 namespace AutoRefreshHDR
 {
-    internal class Program
+    internal abstract class Program
     {
-        static void Main(string[] args)
+        private static void Main()
         {            
             try
             {
@@ -20,7 +20,7 @@ namespace AutoRefreshHDR
 
                 DisplayConfig displayConfig = configuration.Get<DisplayConfig>() ?? new DisplayConfig();
 
-                if (displayConfig.UseAutoRefreshRate == false && displayConfig.UseAutoHDR == false)
+                if (displayConfig is { UseAutoRefreshRate: false, UseAutoHDR: false })
                     Environment.Exit(0);
 
                 int processCount = 0;
@@ -90,41 +90,32 @@ namespace AutoRefreshHDR
         /// Persists the current refresh rate in LocalStorage.
         /// </summary>
         /// <param name="currentRefreshRate">The current refresh rate of the monitor.</param>
-        public static void PersistCurrentRefreshRate(int currentRefreshRate)
+        private static void PersistCurrentRefreshRate(int currentRefreshRate)
         {
-            using (LocalStorage storage = new LocalStorage())
-            {
-                storage.Clear();
-                storage.Store("refreshRate", currentRefreshRate);
-                storage.Persist();
-            }
+            using LocalStorage storage = new LocalStorage();
+            storage.Clear();
+            storage.Store("refreshRate", currentRefreshRate);
+            storage.Persist();
         }
 
         /// <summary>
         /// Gets the current refresh rate persisted in LocalStorage.
         /// </summary>
-        public static int GetCurrentRefreshRatePersisted()
+        private static int GetCurrentRefreshRatePersisted()
         {
-            using (LocalStorage storage = new LocalStorage())
-            {
-                if (storage.Count > 0)
-                {
-                    string? refreshRatetring = storage.Get("refreshRate").ToString();
-                    return int.Parse(refreshRatetring ?? "0"); ;
-                }
-                return 0;
-            }
+            using var storage = new LocalStorage();
+            if (storage.Count <= 0) return 0;
+            var refreshRatetring = storage.Get("refreshRate").ToString();
+            return int.Parse(refreshRatetring ?? "0");
         }
 
         /// <summary>
         /// Deletes the current refresh rate persisted in LocalStorage.
         /// </summary>
-        public static void DeleteRefreshRatePersisted()
+        private static void DeleteRefreshRatePersisted()
         {
-            using (LocalStorage storage = new LocalStorage())
-            {
-                storage.Clear();
-            }
+            using var storage = new LocalStorage();
+            storage.Clear();
         }
     }
 }

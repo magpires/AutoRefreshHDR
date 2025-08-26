@@ -362,3 +362,7 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /appsettings.json
+/.idea/.idea.AutoRefreshHDR/.idea/dictionaries/project.xml
+/.idea/.idea.AutoRefreshHDR/.idea/.gitignore
+/.idea/.idea.AutoRefreshHDR/.idea/indexLayout.xml
+/.idea/.idea.AutoRefreshHDR/.idea/vcs.xml
