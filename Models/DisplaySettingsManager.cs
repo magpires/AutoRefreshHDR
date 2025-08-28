@@ -44,7 +44,7 @@ namespace AutoRefreshHDR.Models
             public int dmPelsWidth;
             public int dmPelsHeight;
             public int dmDisplayFlags;
-            public int dmDisplayFrequency; // Taxa de atualização (Hz)
+            public uint dmDisplayFrequency;
             public int dmICMMethod;
             public int dmICMIntent;
             public int dmMediaType;

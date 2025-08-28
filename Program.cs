@@ -54,7 +54,7 @@ internal abstract class Program
                         if (displayConfig.UseAutoRefreshRate)
                         {
                             PersistCurrentRefreshRate(currentRefreshRate);
-                            DisplaySettingsManagerService.ChangeRefreshRate(programDisplayConfig.refreshRate);
+                            DisplaySettingsManagerService.ChangeRefreshRate(programDisplayConfig.RefreshRate);
                             refreshRateChange = true;
                         }
 
@@ -95,7 +95,7 @@ internal abstract class Program
     ///     Persists the current refresh rate in LocalStorage.
     /// </summary>
     /// <param name="currentRefreshRate">The current refresh rate of the monitor.</param>
-    private static void PersistCurrentRefreshRate(int currentRefreshRate)
+    private static void PersistCurrentRefreshRate(uint currentRefreshRate)
     {
         using var storage = new LocalStorage();
         storage.Clear();
@@ -106,12 +106,12 @@ internal abstract class Program
     /// <summary>
     ///     Gets the current refresh rate persisted in LocalStorage.
     /// </summary>
-    private static int GetCurrentRefreshRatePersisted()
+    private static uint GetCurrentRefreshRatePersisted()
     {
         using var storage = new LocalStorage();
         if (storage.Count <= 0) return 0;
         var refreshRatetring = storage.Get("refreshRate").ToString();
-        return int.Parse(refreshRatetring ?? "0");
+        return uint.Parse(refreshRatetring ?? "0");
     }
 
     /// <summary>
