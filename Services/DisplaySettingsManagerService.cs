@@ -180,23 +180,28 @@ public abstract class DisplaySettingsManagerService
     }
     
     /// <summary>
-    ///     Changes the brightness to the specified value.
+    ///     Changes the brightness to the specified percentage (0–100).
     /// </summary>
-    /// <param name="brightness">The new brightness chosen.</param>
-    public static void SetBrightness(uint brightness)
+    /// <param name="brightnessPercentage">The new brightness chosen (percentage).</param>
+    public static void SetBrightness(uint brightnessPercentage)
     {
         var hMonitor = MonitorFromWindow(IntPtr.Zero, MonitorDefaulttoprimary);
 
         if (GetNumberOfPhysicalMonitorsFromHMONITOR(hMonitor, out var numberOfMonitors) == false ||
             numberOfMonitors <= 0) return;
-        
+
         var physicalMonitors = new PHYSICAL_MONITOR[numberOfMonitors];
 
         if (GetPhysicalMonitorsFromHMONITOR(hMonitor, numberOfMonitors, physicalMonitors) == false) return;
-        
+
         foreach (var monitor in physicalMonitors)
         {
-            SetMonitorBrightness(monitor.hPhysicalMonitor, brightness);
+            if (GetMonitorBrightness(monitor.hPhysicalMonitor, out var min, out var current, out var max) == false) 
+                continue;
+
+            var realBrightness = min + brightnessPercentage * (max - min) / 100;
+
+            SetMonitorBrightness(monitor.hPhysicalMonitor, realBrightness);
         }
 
         DestroyPhysicalMonitors(numberOfMonitors, physicalMonitors);
