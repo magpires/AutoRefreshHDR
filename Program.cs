@@ -11,6 +11,8 @@ internal abstract class Program
     private static void Main()
     {
         var processCount = 0;
+        var brightness = DisplaySettingsManagerService.GetBrightness();
+        DisplaySettingsManagerService.SetBrightness(100);
 
         try
         {

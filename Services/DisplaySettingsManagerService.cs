@@ -147,6 +147,37 @@ public abstract class DisplaySettingsManagerService
     {
         foreach (var proc in Process.GetProcessesByName("hdr_switch_tray")) proc.Kill();
     }
+
+    /// <summary>
+    ///     Returns the current brightness of the monitor as a percentage (0–100).
+    /// </summary>
+    public static uint GetBrightness()
+    {
+        var hMonitor = MonitorFromWindow(IntPtr.Zero, MonitorDefaulttoprimary);
+
+        if (GetNumberOfPhysicalMonitorsFromHMONITOR(hMonitor, out var numberOfMonitors) == false ||
+            numberOfMonitors <= 0) return 0;
+
+        var physicalMonitors = new PHYSICAL_MONITOR[numberOfMonitors];
+
+        if (GetPhysicalMonitorsFromHMONITOR(hMonitor, numberOfMonitors, physicalMonitors) == false) return 0;
+
+        foreach (var monitor in physicalMonitors)
+        {
+            if (GetMonitorBrightness(monitor.hPhysicalMonitor, out var min, out var current, out var max) == false)
+                continue;
+
+            DestroyPhysicalMonitors(numberOfMonitors, physicalMonitors);
+
+            if (max <= min) return 0;
+
+            var percent = (uint)Math.Round((double)(current - min) / (max - min) * 100);
+
+            return percent;
+        }
+
+        return 0;
+    }
     
     /// <summary>
     ///     Changes the brightness to the specified value.
@@ -169,30 +200,5 @@ public abstract class DisplaySettingsManagerService
         }
 
         DestroyPhysicalMonitors(numberOfMonitors, physicalMonitors);
-    }
-
-    /// <summary>
-    ///     Returns the current brightness of the monitor.
-    /// </summary>
-    public static uint GetBrightness()
-    {
-        var hMonitor = MonitorFromWindow(IntPtr.Zero, MonitorDefaulttoprimary);
-
-        if (GetNumberOfPhysicalMonitorsFromHMONITOR(hMonitor, out var numberOfMonitors) == false ||
-            numberOfMonitors <= 0) return 0;
-        
-        var physicalMonitors = new PHYSICAL_MONITOR[numberOfMonitors];
-
-        if (GetPhysicalMonitorsFromHMONITOR(hMonitor, numberOfMonitors, physicalMonitors) == false) return 0;
-        
-        foreach (var monitor in physicalMonitors)
-        {
-            if (GetMonitorBrightness(monitor.hPhysicalMonitor, out var min, out var current, out var max) == false) continue;
-            
-            DestroyPhysicalMonitors(numberOfMonitors, physicalMonitors);
-            return current;
-        }
-
-        return 0;
     }
 }
