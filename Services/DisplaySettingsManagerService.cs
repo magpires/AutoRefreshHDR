@@ -6,7 +6,7 @@ namespace AutoRefreshHDR.Services;
 
 public abstract class DisplaySettingsManagerService
 {
-    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    [DllImport("user32.dll", CharSet = CharSet.Ansi)]
     private static extern bool EnumDisplaySettings(string? deviceName, int modeNum, ref DEVMODE devMode);
 
     [DllImport("user32.dll")]
