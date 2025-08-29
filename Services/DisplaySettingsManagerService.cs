@@ -50,7 +50,7 @@ public abstract class DisplaySettingsManagerService
     /// <summary>
     ///     Returns the current refresh rate of the monitor.
     /// </summary>
-    public static uint GetCurrentRefreshRate()
+    public static int GetCurrentRefreshRate()
     {
         var dm = new DEVMODE
         {
@@ -68,7 +68,7 @@ public abstract class DisplaySettingsManagerService
     ///     Changes the refresh rate to the specified value.
     /// </summary>
     /// <param name="newRefreshRate">The new refresh rate (Hz) chosen.</param>
-    public static void ChangeRefreshRate(uint newRefreshRate)
+    public static void ChangeRefreshRate(int newRefreshRate)
     {
         var dm = new DEVMODE
         {

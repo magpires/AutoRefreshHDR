@@ -4,17 +4,17 @@
   "ProgramDisplayConfigs": [
     {
       "ProgramName": "executable_exemple1.exe",
-      "RefreshRate": 144,
+      "RefreshRate": 240,
       "Hdr": true
     },
     {
       "ProgramName": "executable_exemple2.exe",
-      "RefreshRate": 144,
+      "RefreshRate": 120,
       "Hdr": false
     },
     {
       "ProgramName": "executable_exemple3.exe",
-      "RefreshRate": 144,
+      "RefreshRate": 60,
       "Hdr": false
     }
   ],

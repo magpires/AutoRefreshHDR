@@ -11,8 +11,8 @@ internal abstract class Program
     private static void Main()
     {
         var processCount = 0;
-        var brightness = DisplaySettingsManagerService.GetBrightness();
-        DisplaySettingsManagerService.SetBrightness(100);
+        // var brightness = DisplaySettingsManagerService.GetBrightness();
+        // DisplaySettingsManagerService.SetBrightness(100);
 
         try
         {
@@ -95,7 +95,7 @@ internal abstract class Program
     ///     Persists the current refresh rate in LocalStorage.
     /// </summary>
     /// <param name="currentRefreshRate">The current refresh rate of the monitor.</param>
-    private static void PersistCurrentRefreshRate(uint currentRefreshRate)
+    private static void PersistCurrentRefreshRate(int currentRefreshRate)
     {
         using var storage = new LocalStorage();
         storage.Clear();
@@ -106,12 +106,12 @@ internal abstract class Program
     /// <summary>
     ///     Gets the current refresh rate persisted in LocalStorage.
     /// </summary>
-    private static uint GetCurrentRefreshRatePersisted()
+    private static int GetCurrentRefreshRatePersisted()
     {
         using var storage = new LocalStorage();
         if (storage.Count <= 0) return 0;
         var refreshRatetring = storage.Get("refreshRate").ToString();
-        return uint.Parse(refreshRatetring ?? "0");
+        return int.Parse(refreshRatetring ?? "0");
     }
 
     /// <summary>
