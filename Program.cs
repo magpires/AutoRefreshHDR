@@ -11,8 +11,6 @@ internal abstract class Program
     private static void Main()
     {
         var processCount = 0;
-        // var brightness = DisplaySettingsManagerService.GetBrightness();
-        // DisplaySettingsManagerService.SetBrightness(100);
 
         try
         {
@@ -24,20 +22,31 @@ internal abstract class Program
 
             var displayConfig = configuration.Get<DisplayConfig>() ?? new DisplayConfig();
 
-            if (displayConfig is { UseAutoRefreshRate: false, UseAutoHdr: false })
+            if (displayConfig is { UseAutoRefreshRate: false, UseAutoHdr: false, UseBrightnessLevel: false })
                 Environment.Exit(0);
 
             var hdrActivated = false;
             var refreshRateChange = false;
+            var brightnessLevelChange = false;
             var currentRefreshRate = DisplaySettingsManagerService.GetCurrentRefreshRate();
+            var currentBrightnessLevel = DisplaySettingsManagerService.GetCurrentBrightness();
             var currentRefreshRatePersisted = GetCurrentRefreshRatePersisted();
+            var currentBrightnessLevelPersisted = GetCurrentBrightnessLevelPersisted();
 
             if (displayConfig.UseAutoRefreshRate && currentRefreshRatePersisted > 0 &&
                 currentRefreshRatePersisted != currentRefreshRate)
             {
-                DisplaySettingsManagerService.ChangeRefreshRate(currentRefreshRatePersisted);
+                DisplaySettingsManagerService.SetRefreshRate(currentRefreshRatePersisted);
                 currentRefreshRate = currentRefreshRatePersisted;
-                DeleteRefreshRatePersisted();
+                DeleteLocalStorage();
+            }
+            
+            if (displayConfig.UseBrightnessLevel && currentBrightnessLevelPersisted > 0 &&
+                currentBrightnessLevelPersisted != currentBrightnessLevel)
+            {
+                DisplaySettingsManagerService.SetBrightness(currentRefreshRatePersisted);
+                currentRefreshRate = currentRefreshRatePersisted;
+                DeleteLocalStorage();
             }
 
             while (true)
@@ -49,16 +58,26 @@ internal abstract class Program
 
                 foreach (var programDisplayConfig in displayConfig.ProgramDisplayConfigs)
                 {
+                    if (programDisplayConfig.Active == false)
+                        continue;
+                    
                     if (Process.GetProcessesByName(programDisplayConfig.ProgramName.Replace(".exe", "")).Length != 0)
                     {
+                        if (displayConfig.UseBrightnessLevel)
+                        {
+                            PersistCurrentBrightnessLevel(currentBrightnessLevel);
+                            DisplaySettingsManagerService.SetBrightness(programDisplayConfig.BrightnessLevel);
+                            brightnessLevelChange = true;
+                        }
+                        
                         if (displayConfig.UseAutoRefreshRate)
                         {
                             PersistCurrentRefreshRate(currentRefreshRate);
-                            DisplaySettingsManagerService.ChangeRefreshRate(programDisplayConfig.RefreshRate);
+                            DisplaySettingsManagerService.SetRefreshRate(programDisplayConfig.RefreshRate);
                             refreshRateChange = true;
                         }
 
-                        if (displayConfig.UseAutoHdr && programDisplayConfig.Hdr && !hdrActivated)
+                        if (displayConfig.UseAutoHdr && programDisplayConfig.Hdr && hdrActivated == false)
                         {
                             DisplaySettingsManagerService.HdrSwitchOn();
                             hdrActivated = true;
@@ -69,19 +88,22 @@ internal abstract class Program
                             Thread.Sleep(1000);
                     }
 
-                    if (!hdrActivated && !refreshRateChange) continue;
+                    if (hdrActivated == false && refreshRateChange == false && brightnessLevelChange == false) continue;
+                    
+                    if (displayConfig.UseBrightnessLevel && brightnessLevelChange)
+                        DisplaySettingsManagerService.SetBrightness(currentBrightnessLevel);
 
                     if (displayConfig.UseAutoHdr && hdrActivated)
                         DisplaySettingsManagerService.HdrSwitchOff();
 
                     if (displayConfig.UseAutoRefreshRate && refreshRateChange)
-                    {
-                        DisplaySettingsManagerService.ChangeRefreshRate(currentRefreshRate);
-                        DeleteRefreshRatePersisted();
-                    }
+                        DisplaySettingsManagerService.SetRefreshRate(currentRefreshRate);
+                    
+                    DeleteLocalStorage();
 
                     hdrActivated = false;
                     refreshRateChange = false;
+                    brightnessLevelChange = false;
                 }
             }
         }
@@ -115,9 +137,32 @@ internal abstract class Program
     }
 
     /// <summary>
-    ///     Deletes the current refresh rate persisted in LocalStorage.
+    ///     Gets the current brightness level persisted in LocalStorage.
     /// </summary>
-    private static void DeleteRefreshRatePersisted()
+    private static uint GetCurrentBrightnessLevelPersisted()
+    {
+        using var storage = new LocalStorage();
+        if (storage.Count <= 0) return 0;
+        var brightnessLevel = storage.Get("brightnessLevel").ToString();
+        return uint.Parse(brightnessLevel ?? "0");
+    }
+
+    /// <summary>
+    ///     Persists the current brightness level in LocalStorage.
+    /// </summary>
+    /// <param name="currentBrightnessLevel">The current brightness level of the monitor.</param>
+    private static void PersistCurrentBrightnessLevel(uint currentBrightnessLevel)
+    {
+        using var storage = new LocalStorage();
+        storage.Clear();
+        storage.Store("brightnessLevel", currentBrightnessLevel);
+        storage.Persist();
+    }
+
+    /// <summary>
+    ///     Deletes the LocalStorage.
+    /// </summary>
+    private static void DeleteLocalStorage()
     {
         using var storage = new LocalStorage();
         storage.Clear();

@@ -5,5 +5,6 @@
         public ProgramDisplayConfig[] ProgramDisplayConfigs { get; init; } = [];
         public bool UseAutoRefreshRate { get; init; }
         public bool UseAutoHdr { get; init; }
+        public bool UseBrightnessLevel { get; init; }
     }
 }

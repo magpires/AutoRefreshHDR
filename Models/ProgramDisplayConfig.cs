@@ -1,6 +1,6 @@
 ﻿namespace AutoRefreshHDR.Models
 {
-    public abstract class ProgramDisplayConfig
+    public class ProgramDisplayConfig
     {
         public string ProgramName { get; set; } = string.Empty;
         public uint RefreshRate { get; set; }

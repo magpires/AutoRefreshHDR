@@ -68,7 +68,7 @@ public abstract class DisplaySettingsManagerService
     ///     Changes the refresh rate to the specified value.
     /// </summary>
     /// <param name="newRefreshRate">The new refresh rate (Hz) chosen.</param>
-    public static void ChangeRefreshRate(uint newRefreshRate)
+    public static void SetRefreshRate(uint newRefreshRate)
     {
         var dm = new DEVMODE
         {
@@ -151,7 +151,7 @@ public abstract class DisplaySettingsManagerService
     /// <summary>
     ///     Returns the current brightness of the monitor as a percentage (0–100).
     /// </summary>
-    public static uint GetBrightness()
+    public static uint GetCurrentBrightness()
     {
         var hMonitor = MonitorFromWindow(IntPtr.Zero, MonitorDefaulttoprimary);
 

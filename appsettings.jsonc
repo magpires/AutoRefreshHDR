@@ -5,19 +5,26 @@
     {
       "ProgramName": "executable_exemple1.exe",
       "RefreshRate": 240,
-      "Hdr": true
+      "Hdr": true,
+      "BrightnessLevel": 100,
+      "Active": true
     },
     {
       "ProgramName": "executable_exemple2.exe",
       "RefreshRate": 120,
-      "Hdr": false
+      "Hdr": false,
+      "BrightnessLevel": 50,
+      "Active": true
     },
     {
       "ProgramName": "executable_exemple3.exe",
       "RefreshRate": 60,
-      "Hdr": false
+      "Hdr": false,
+      "BrightnessLevel": 100,
+      "Active": true
     }
   ],
   "UseAutoRefreshRate": true, // Set to true if you want to use auto refresh rate. Applies to all defined programs.
-  "UseAutoHDR": true // Set to true if you want to use auto HDR. Applies to all defined programs.
+  "UseAutoHDR": true, // Set to true if you want to use auto HDR. Applies to all defined programs.
+  "UseBrightnessLevel": true // Set to true if you want to use brightness level. Applies to all defined programs.
 }
