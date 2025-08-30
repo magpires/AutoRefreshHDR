@@ -24,7 +24,7 @@ internal abstract class Program
 
             var displayConfig = configuration.Get<DisplayConfig>() ?? new DisplayConfig();
 
-            if (displayConfig is { UseAutoRefreshRate: false, UseAutoHDR: false })
+            if (displayConfig is { UseAutoRefreshRate: false, UseAutoHdr: false })
                 Environment.Exit(0);
 
             var hdrActivated = false;
@@ -58,7 +58,7 @@ internal abstract class Program
                             refreshRateChange = true;
                         }
 
-                        if (displayConfig.UseAutoHDR && programDisplayConfig.Hdr && !hdrActivated)
+                        if (displayConfig.UseAutoHdr && programDisplayConfig.Hdr && !hdrActivated)
                         {
                             DisplaySettingsManagerService.HdrSwitchOn();
                             hdrActivated = true;
@@ -71,7 +71,7 @@ internal abstract class Program
 
                     if (!hdrActivated && !refreshRateChange) continue;
 
-                    if (displayConfig.UseAutoHDR && hdrActivated)
+                    if (displayConfig.UseAutoHdr && hdrActivated)
                         DisplaySettingsManagerService.HdrSwitchOff();
 
                     if (displayConfig.UseAutoRefreshRate && refreshRateChange)
