@@ -63,14 +63,14 @@ internal abstract class Program
                     
                     if (Process.GetProcessesByName(programDisplayConfig.ProgramName.Replace(".exe", "")).Length != 0)
                     {
-                        if (displayConfig.UseBrightnessLevel)
+                        if (displayConfig.UseBrightnessLevel && currentBrightnessLevel != programDisplayConfig.BrightnessLevel)
                         {
                             PersistCurrentBrightnessLevel(currentBrightnessLevel);
                             DisplaySettingsManagerService.SetBrightness(programDisplayConfig.BrightnessLevel);
                             brightnessLevelChange = true;
                         }
                         
-                        if (displayConfig.UseAutoRefreshRate)
+                        if (displayConfig.UseAutoRefreshRate && currentRefreshRate != programDisplayConfig.RefreshRate)
                         {
                             PersistCurrentRefreshRate(currentRefreshRate);
                             DisplaySettingsManagerService.SetRefreshRate(programDisplayConfig.RefreshRate);
