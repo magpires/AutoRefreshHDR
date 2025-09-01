@@ -89,7 +89,9 @@ internal abstract class Program
                         programDisplayConfig.BrightnessLevel is not null &&
                         currentBrightnessLevel != programDisplayConfig.BrightnessLevel)
                     {
-                        Thread.Sleep(millisecondsToSetbrightness);
+                        if (refreshRateChange || hdrActivated)
+                            Thread.Sleep(millisecondsToSetbrightness);
+                        
                         PersistCurrentBrightnessLevel(currentBrightnessLevel);
                         DisplaySettingsManagerService.SetBrightness(programDisplayConfig.BrightnessLevel.Value);
                         brightnessLevelChange = true;
@@ -109,7 +111,9 @@ internal abstract class Program
 
                     if (displayConfig.UseBrightnessLevel && brightnessLevelChange)
                     {
-                        Thread.Sleep(millisecondsToSetbrightness);
+                        if (refreshRateChange || hdrActivated)
+                            Thread.Sleep(millisecondsToSetbrightness);
+                        
                         DisplaySettingsManagerService.SetBrightness(currentBrightnessLevel);
                     }
                     
