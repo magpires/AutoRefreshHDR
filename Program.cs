@@ -12,6 +12,8 @@ internal abstract class Program
     {
         var processCount = 0;
 
+        const int millisecondsToSetbrightness = 2000;
+
         try
         {
             Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.Idle;
@@ -68,15 +70,6 @@ internal abstract class Program
                     currentRefreshRate = DisplaySettingsManagerService.GetCurrentRefreshRate();
                     currentBrightnessLevel = DisplaySettingsManagerService.GetCurrentBrightness();
 
-                    if (displayConfig.UseBrightnessLevel &&
-                        programDisplayConfig.BrightnessLevel is not null &&
-                        currentBrightnessLevel != programDisplayConfig.BrightnessLevel)
-                    {
-                        PersistCurrentBrightnessLevel(currentBrightnessLevel);
-                        DisplaySettingsManagerService.SetBrightness(programDisplayConfig.BrightnessLevel.Value);
-                        brightnessLevelChange = true;
-                    }
-
                     if (displayConfig.UseAutoRefreshRate &&
                         programDisplayConfig.RefreshRate is not null &&
                         currentRefreshRate != programDisplayConfig.RefreshRate)
@@ -92,20 +85,33 @@ internal abstract class Program
                         hdrActivated = true;
                     }
 
+                    if (displayConfig.UseBrightnessLevel &&
+                        programDisplayConfig.BrightnessLevel is not null &&
+                        currentBrightnessLevel != programDisplayConfig.BrightnessLevel)
+                    {
+                        Thread.Sleep(millisecondsToSetbrightness);
+                        PersistCurrentBrightnessLevel(currentBrightnessLevel);
+                        DisplaySettingsManagerService.SetBrightness(programDisplayConfig.BrightnessLevel.Value);
+                        brightnessLevelChange = true;
+                    }
+
                     while (Process.GetProcessesByName(programDisplayConfig.ProgramName.Replace(".exe", ""))
                                .Length != 0)
                         Thread.Sleep(1000);
                         
                     if (hdrActivated == false && refreshRateChange == false && brightnessLevelChange == false) continue;
-                    
-                    if (displayConfig.UseBrightnessLevel && brightnessLevelChange)
-                        DisplaySettingsManagerService.SetBrightness(currentBrightnessLevel);
 
                     if (displayConfig.UseAutoHdr && hdrActivated)
                         DisplaySettingsManagerService.HdrSwitchOff();
 
                     if (displayConfig.UseAutoRefreshRate && refreshRateChange)
                         DisplaySettingsManagerService.SetRefreshRate(currentRefreshRate);
+
+                    if (displayConfig.UseBrightnessLevel && brightnessLevelChange)
+                    {
+                        Thread.Sleep(millisecondsToSetbrightness);
+                        DisplaySettingsManagerService.SetBrightness(currentBrightnessLevel);
+                    }
                     
                     DeleteLocalStorage();
 
@@ -127,9 +133,23 @@ internal abstract class Program
     private static uint? GetCurrentRefreshRatePersisted()
     {
         using var storage = new LocalStorage();
-        if (storage.Count <= 0) return 0;
-        var refreshRatetring = storage.Get("refreshRate").ToString();
-        return uint.Parse(refreshRatetring ?? "0");
+        if (storage.Count <= 0) return null;
+
+        string? refreshRatetring;
+        
+        try
+        {
+            refreshRatetring = storage.Get("refreshRate").ToString();
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+        
+        if (uint.TryParse(refreshRatetring, out var value))
+            return value;
+
+        return null;
     }
 
     /// <summary>
@@ -139,8 +159,16 @@ internal abstract class Program
     private static void PersistCurrentRefreshRate(uint? currentRefreshRate)
     {
         using var storage = new LocalStorage();
-        storage.Clear();
-        storage.Store("refreshRate", currentRefreshRate);
+
+        if (currentRefreshRate is null)
+        {
+            storage.Remove("refreshRate");
+        }
+        else
+        {
+            storage.Store("refreshRate", currentRefreshRate.Value);
+        }
+
         storage.Persist();
     }
 
@@ -150,9 +178,23 @@ internal abstract class Program
     private static uint? GetCurrentBrightnessLevelPersisted()
     {
         using var storage = new LocalStorage();
-        if (storage.Count <= 0) return 0;
-        var brightnessLevel = storage.Get("brightnessLevel").ToString();
-        return uint.Parse(brightnessLevel ?? "0");
+        if (storage.Count <= 0) return null;
+
+        string? brightnessLevel;
+        
+        try
+        {
+            brightnessLevel = storage.Get("brightnessLevel").ToString();
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+        
+        if (uint.TryParse(brightnessLevel, out var value))
+            return value;
+
+        return null;
     }
 
     /// <summary>
@@ -162,8 +204,16 @@ internal abstract class Program
     private static void PersistCurrentBrightnessLevel(uint? currentBrightnessLevel)
     {
         using var storage = new LocalStorage();
-        storage.Clear();
-        storage.Store("brightnessLevel", currentBrightnessLevel);
+
+        if (currentBrightnessLevel is null)
+        {
+            storage.Remove("brightnessLevel");
+        }
+        else
+        {
+            storage.Store("brightnessLevel", currentBrightnessLevel.Value);
+        }
+
         storage.Persist();
     }
 
