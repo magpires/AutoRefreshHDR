@@ -5,16 +5,42 @@ VisualStudioVersion = 17.9.34728.123
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoRefreshHDR", "AutoRefreshHDR.csproj", "{BE05CC46-96E8-4697-9745-27D7DDFE56AA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoRefreshHDR.ConfigEditor", "AutoRefreshHDR.ConfigEditor\AutoRefreshHDR.ConfigEditor.csproj", "{B87702E1-152A-44E4-A25F-AB3FF0E54F4D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
 		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{BE05CC46-96E8-4697-9745-27D7DDFE56AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BE05CC46-96E8-4697-9745-27D7DDFE56AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE05CC46-96E8-4697-9745-27D7DDFE56AA}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{BE05CC46-96E8-4697-9745-27D7DDFE56AA}.Debug|x64.Build.0 = Debug|Any CPU
+		{BE05CC46-96E8-4697-9745-27D7DDFE56AA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{BE05CC46-96E8-4697-9745-27D7DDFE56AA}.Debug|x86.Build.0 = Debug|Any CPU
 		{BE05CC46-96E8-4697-9745-27D7DDFE56AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BE05CC46-96E8-4697-9745-27D7DDFE56AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE05CC46-96E8-4697-9745-27D7DDFE56AA}.Release|x64.ActiveCfg = Release|Any CPU
+		{BE05CC46-96E8-4697-9745-27D7DDFE56AA}.Release|x64.Build.0 = Release|Any CPU
+		{BE05CC46-96E8-4697-9745-27D7DDFE56AA}.Release|x86.ActiveCfg = Release|Any CPU
+		{BE05CC46-96E8-4697-9745-27D7DDFE56AA}.Release|x86.Build.0 = Release|Any CPU
+		{B87702E1-152A-44E4-A25F-AB3FF0E54F4D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B87702E1-152A-44E4-A25F-AB3FF0E54F4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B87702E1-152A-44E4-A25F-AB3FF0E54F4D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B87702E1-152A-44E4-A25F-AB3FF0E54F4D}.Debug|x64.Build.0 = Debug|Any CPU
+		{B87702E1-152A-44E4-A25F-AB3FF0E54F4D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B87702E1-152A-44E4-A25F-AB3FF0E54F4D}.Debug|x86.Build.0 = Debug|Any CPU
+		{B87702E1-152A-44E4-A25F-AB3FF0E54F4D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B87702E1-152A-44E4-A25F-AB3FF0E54F4D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B87702E1-152A-44E4-A25F-AB3FF0E54F4D}.Release|x64.ActiveCfg = Release|Any CPU
+		{B87702E1-152A-44E4-A25F-AB3FF0E54F4D}.Release|x64.Build.0 = Release|Any CPU
+		{B87702E1-152A-44E4-A25F-AB3FF0E54F4D}.Release|x86.ActiveCfg = Release|Any CPU
+		{B87702E1-152A-44E4-A25F-AB3FF0E54F4D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
