@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 using System.ComponentModel;
 using AutoRefreshHDR.ConfigEditor.Models;
+using AutoRefreshHDR.ConfigEditor.Services;
 
 namespace AutoRefreshHDR.ConfigEditor;
 
@@ -17,35 +18,91 @@ public class ConfigEditorForm : Form
     private readonly Button _openButton;
     private readonly Button _addRowButton;
     private readonly Button _removeRowButton;
-
+    
+    private readonly ConfigService _configService;
     private string? _configPath;
     private DisplayConfig _currentConfig = new();
     private BindingList<ProgramDisplayConfig> _bindingList = new();
 
     public ConfigEditorForm()
     {
+        _configService = new ConfigService();
+        
         Text = "AutoRefreshHDR - Config Editor";
         Width = 900;
         Height = 650;
         StartPosition = FormStartPosition.CenterScreen;
-
-        // Painel de opções gerais (checkboxes)
-        var topPanel = new FlowLayoutPanel
+        
+        // Use um TableLayoutPanel para a estrutura principal
+        var mainLayout = new TableLayoutPanel
         {
-            Dock = DockStyle.Top,
-            Height = 40,
-            FlowDirection = FlowDirection.LeftToRight,
-            Padding = new Padding(8, 8, 8, 0)
+            Dock = DockStyle.Fill,
+            Padding = new Padding(8),
+            ColumnCount = 1,
+            RowCount = 3, // 1 para config global, 1 para grid, 1 para botões de baixo
+            RowStyles =
+            {
+                new RowStyle(SizeType.Absolute, 70), 
+                new RowStyle(SizeType.Percent, 100),
+                new RowStyle(SizeType.Absolute, 50)
+            }
         };
 
-        _chkUseAutoRefreshRate = new CheckBox { Text = "Use Auto Refresh Rate" };
-        _chkUseAutoHDR = new CheckBox { Text = "Use Auto HDR" };
-        _chkUseBrightness = new CheckBox { Text = "Use Brightness Level" };
+        // 1. GroupBox para configurações globais
+        var globalSettingsGroup = new GroupBox
+        {
+            Text = "Global Settings",
+            Dock = DockStyle.Fill,
+            Padding = new Padding(10)
+        };
+        
+        var globalSettingsPanel = new FlowLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            FlowDirection = FlowDirection.LeftToRight,
+            WrapContents = false
+        };
 
-        topPanel.Controls.Add(_chkUseAutoRefreshRate);
-        topPanel.Controls.Add(_chkUseAutoHDR);
-        topPanel.Controls.Add(_chkUseBrightness);
+        _chkUseAutoRefreshRate = new CheckBox { Text = "Use Auto Refresh Rate", AutoSize = true, Padding = new Padding(0,0,20,0)};
+        _chkUseAutoHDR = new CheckBox { Text = "Use Auto HDR", AutoSize = true, Padding = new Padding(0,0,20,0) };
+        _chkUseBrightness = new CheckBox { Text = "Use Brightness Level", AutoSize = true };
 
+        globalSettingsPanel.Controls.Add(_chkUseAutoRefreshRate);
+        globalSettingsPanel.Controls.Add(_chkUseAutoHDR);
+        globalSettingsPanel.Controls.Add(_chkUseBrightness);
+        globalSettingsGroup.Controls.Add(globalSettingsPanel);
+
+        // 2. GroupBox para configurações por programa
+        var programSettingsGroup = new GroupBox
+        {
+            Text = "Per-Program Settings",
+            Dock = DockStyle.Fill,
+            Padding = new Padding(10)
+        };
+        
+        // Layout interno do grupo de programas
+        var programSettingsLayout = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            ColumnCount = 1,
+            RowCount = 2,
+            RowStyles = { new RowStyle(SizeType.Absolute, 40), new RowStyle(SizeType.Percent, 100) }
+        };
+        
+        _addRowButton = new Button { Text = "+ Add", Width = 70 };
+        _addRowButton.Click += (_, _) => AddRow();
+
+        _removeRowButton = new Button { Text = "- Remove", Width = 80 };
+        _removeRowButton.Click += (_, _) => RemoveSelectedRow();
+        
+        var gridButtonsPanel = new FlowLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            FlowDirection = FlowDirection.LeftToRight,
+        };
+        gridButtonsPanel.Controls.Add(_addRowButton);
+        gridButtonsPanel.Controls.Add(_removeRowButton);
+        
         // Grid para ProgramDisplayConfigs
         _grid = new DataGridView
         {
@@ -56,96 +113,46 @@ public class ConfigEditorForm : Form
             SelectionMode = DataGridViewSelectionMode.FullRowSelect,
             MultiSelect = false
         };
+        const string programNameColumnName = "ProgramNameDGV";
 
-        _grid.Columns.Add(new DataGridViewTextBoxColumn
-        {
-            DataPropertyName = nameof(ProgramDisplayConfig.ProgramName),
-            HeaderText = "Program Name",
-            Width = 250
-        });
-
-        _grid.Columns.Add(new DataGridViewTextBoxColumn
-        {
-            DataPropertyName = nameof(ProgramDisplayConfig.RefreshRate),
-            HeaderText = "Refresh (Hz)",
-            Width = 90
-        });
-
-        _grid.Columns.Add(new DataGridViewCheckBoxColumn
-        {
-            DataPropertyName = nameof(ProgramDisplayConfig.Hdr),
-            HeaderText = "HDR",
-            Width = 60
-        });
-
-        _grid.Columns.Add(new DataGridViewTextBoxColumn
-        {
-            DataPropertyName = nameof(ProgramDisplayConfig.BrightnessLevel),
-            HeaderText = "Brightness (0-100)",
-            Width = 110
-        });
-
-        _grid.Columns.Add(new DataGridViewCheckBoxColumn
-        {
-            DataPropertyName = nameof(ProgramDisplayConfig.Active),
-            HeaderText = "Active",
-            Width = 60
-        });
-
+        _grid.Columns.Add(new DataGridViewTextBoxColumn { Name= programNameColumnName, DataPropertyName = nameof(ProgramDisplayConfig.ProgramName), HeaderText = "Program Name", Width = 300 });
+        _grid.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = nameof(ProgramDisplayConfig.RefreshRate), HeaderText = "Refresh (Hz)", Width = 90 });
+        _grid.Columns.Add(new DataGridViewCheckBoxColumn { DataPropertyName = nameof(ProgramDisplayConfig.Hdr), HeaderText = "HDR", Width = 60 });
+        _grid.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = nameof(ProgramDisplayConfig.BrightnessLevel), HeaderText = "Brightness (0-100)", Width = 110 });
+        _grid.Columns.Add(new DataGridViewCheckBoxColumn { DataPropertyName = nameof(ProgramDisplayConfig.Active), HeaderText = "Active", Width = 60 });
         _grid.CellValidating += GridOnCellValidating;
-
-        // Botões de baixo
-        _saveButton = new Button
-        {
-            Text = "Save && Restart",
-            Dock = DockStyle.Right,
-            Width = 130,
-            Enabled = false
-        };
+        
+        programSettingsLayout.Controls.Add(gridButtonsPanel, 0, 0);
+        programSettingsLayout.Controls.Add(_grid, 0, 1);
+        programSettingsGroup.Controls.Add(programSettingsLayout);
+        
+        // 3. Botões de baixo
+        _saveButton = new Button { Text = "Save && Restart", Width = 130, Enabled = false };
         _saveButton.Click += SaveButtonOnClick;
 
-        _openButton = new Button
-        {
-            Text = "Open appsettings.jsonc",
-            Dock = DockStyle.Left,
-            Width = 180
-        };
+        _openButton = new Button { Text = "Open appsettings.jsonc", Width = 180 };
         _openButton.Click += OpenButtonOnClick;
-
-        _addRowButton = new Button
-        {
-            Text = "+ Add",
-            Dock = DockStyle.Left,
-            Width = 70
-        };
-        _addRowButton.Click += (_, _) => AddRow();
-
-        _removeRowButton = new Button
-        {
-            Text = "- Remove",
-            Dock = DockStyle.Left,
-            Width = 80
-        };
-        _removeRowButton.Click += (_, _) => RemoveSelectedRow();
 
         var bottomPanel = new Panel
         {
-            Dock = DockStyle.Bottom,
-            Height = 40
+            Dock = DockStyle.Fill
         };
 
         bottomPanel.Controls.Add(_saveButton);
-        bottomPanel.Controls.Add(_removeRowButton);
-        bottomPanel.Controls.Add(_addRowButton);
         bottomPanel.Controls.Add(_openButton);
+        _saveButton.Dock = DockStyle.Right;
+        _openButton.Dock = DockStyle.Left;
+        
+        // Adiciona os grupos ao layout principal
+        mainLayout.Controls.Add(globalSettingsGroup, 0, 0);
+        mainLayout.Controls.Add(programSettingsGroup, 0, 1);
+        mainLayout.Controls.Add(bottomPanel, 0, 2);
 
-        Controls.Add(_grid);
-        Controls.Add(topPanel);
-        Controls.Add(bottomPanel);
+        Controls.Add(mainLayout);
 
         Load += (_, _) => TryLoadDefaultConfig();
     }
-
+    
     private void TryLoadDefaultConfig()
     {
         // 1) Tenta abrir um appsettings.jsonc no mesmo diretório do executável do editor
@@ -194,17 +201,8 @@ public class ConfigEditorForm : Form
             Program.CurrentConfigPath = path;
 
             Text = $"AutoRefreshHDR - Config Editor ({path})";
-
-            var json = File.ReadAllText(path, Encoding.UTF8);
-            var options = new JsonSerializerOptions
-            {
-                ReadCommentHandling = JsonCommentHandling.Skip,
-                AllowTrailingCommas = true,
-                PropertyNameCaseInsensitive = true
-            };
-
-            _currentConfig = JsonSerializer.Deserialize<DisplayConfig>(json, options) ?? new DisplayConfig();
-            _currentConfig.ProgramDisplayConfigs ??= new List<ProgramDisplayConfig>();
+            
+            _currentConfig = _configService.LoadConfig(path);
 
             _chkUseAutoRefreshRate.Checked = _currentConfig.UseAutoRefreshRate;
             _chkUseAutoHDR.Checked = _currentConfig.UseAutoHDR;
@@ -225,8 +223,13 @@ public class ConfigEditorForm : Form
     private void GridOnCellValidating(object? sender, DataGridViewCellValidatingEventArgs e)
     {
         if (e.RowIndex < 0) return;
+        
+        var column = _grid.Columns[e.ColumnIndex];
+        
+        // A validação só se aplica a colunas que não são a de botão
+        if (column is DataGridViewButtonColumn) return;
 
-        var columnName = _grid.Columns[e.ColumnIndex].DataPropertyName;
+        var columnName = column.DataPropertyName;
         if (columnName is nameof(ProgramDisplayConfig.RefreshRate) or nameof(ProgramDisplayConfig.BrightnessLevel))
         {
             var text = e.FormattedValue?.ToString();
@@ -256,14 +259,31 @@ public class ConfigEditorForm : Form
 
     private void AddRow()
     {
-        _bindingList.Add(new ProgramDisplayConfig
+        using var ofd = new OpenFileDialog
         {
-            ProgramName = string.Empty,
-            RefreshRate = null,
-            Hdr = false,
-            BrightnessLevel = 100,
-            Active = true
-        });
+            Title = "Selecione o executável",
+            Filter = "Executables (*.exe)|*.exe|Todos os arquivos (*.*)|*.*",
+            CheckFileExists = true
+        };
+
+        if (ofd.ShowDialog(this) == DialogResult.OK)
+        {
+            var fileName = Path.GetFileName(ofd.FileName);
+            if (_bindingList.Any(p => p.ProgramName.Equals(fileName, StringComparison.OrdinalIgnoreCase)))
+            {
+                MessageBox.Show($"O programa '{fileName}' já existe na lista.", "Programa Duplicado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            
+            _bindingList.Add(new ProgramDisplayConfig
+            {
+                ProgramName = fileName,
+                RefreshRate = null,
+                Hdr = false,
+                BrightnessLevel = 100,
+                Active = true
+            });
+        }
     }
 
     private void RemoveSelectedRow()
@@ -299,47 +319,12 @@ public class ConfigEditorForm : Form
 
         try
         {
-            var options = new JsonSerializerOptions
-            {
-                WriteIndented = true
-            };
-            var json = JsonSerializer.Serialize(_currentConfig, options);
-            File.WriteAllText(_configPath, json, Encoding.UTF8);
+            _configService.SaveConfig(_configPath, _currentConfig);
+            _configService.RestartMainApp(_configPath);
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Erro ao salvar appsettings.jsonc: {ex.Message}", "Erro",
-                MessageBoxButtons.OK, MessageBoxIcon.Error);
-            return;
-        }
-
-        try
-        {
-            // Pasta onde está o AutoRefreshHDR.exe (mesma pasta do appsettings selecionado)
-            var autoRefreshDir = Path.GetDirectoryName(_configPath) ?? AppContext.BaseDirectory;
-            var batPath = Path.Combine(autoRefreshDir, "RestartAutoRefreshHDR.bat");
-
-            if (!File.Exists(batPath))
-            {
-                MessageBox.Show($"RestartAutoRefreshHDR.bat não encontrado em {autoRefreshDir}", "Erro",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            var startInfo = new ProcessStartInfo
-            {
-                FileName = "cmd.exe",
-                Arguments = "/c \"RestartAutoRefreshHDR.bat\"",
-                WorkingDirectory = autoRefreshDir,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
-
-            Process.Start(startInfo);
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Erro ao reiniciar o AutoRefreshHDR: {ex.Message}", "Erro",
+            MessageBox.Show($"Erro ao salvar ou reiniciar: {ex.Message}", "Erro",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
             return;
         }
