@@ -30,13 +30,12 @@ public class ConfigEditorForm : Form
         Height = 650;
         StartPosition = FormStartPosition.CenterScreen;
         
-        // Use um TableLayoutPanel para a estrutura principal
         var mainLayout = new TableLayoutPanel
         {
             Dock = DockStyle.Fill,
             Padding = new Padding(8),
             ColumnCount = 1,
-            RowCount = 3, // 1 para config global, 1 para grid, 1 para botões de baixo
+            RowCount = 3, 
             RowStyles =
             {
                 new RowStyle(SizeType.Absolute, 70), 
@@ -45,7 +44,6 @@ public class ConfigEditorForm : Form
             }
         };
 
-        // 1. GroupBox para configurações globais
         var globalSettingsGroup = new GroupBox
         {
             Text = "Global Settings",
@@ -69,7 +67,6 @@ public class ConfigEditorForm : Form
         globalSettingsPanel.Controls.Add(_chkUseBrightness);
         globalSettingsGroup.Controls.Add(globalSettingsPanel);
 
-        // 2. GroupBox para configurações por programa
         var programSettingsGroup = new GroupBox
         {
             Text = "Per-Program Settings",
@@ -77,7 +74,6 @@ public class ConfigEditorForm : Form
             Padding = new Padding(10)
         };
         
-        // Layout interno do grupo de programas
         var programSettingsLayout = new TableLayoutPanel
         {
             Dock = DockStyle.Fill,
@@ -100,7 +96,6 @@ public class ConfigEditorForm : Form
         gridButtonsPanel.Controls.Add(_addRowButton);
         gridButtonsPanel.Controls.Add(_removeRowButton);
         
-        // Grid para ProgramDisplayConfigs
         _grid = new DataGridView
         {
             Dock = DockStyle.Fill,
@@ -109,9 +104,9 @@ public class ConfigEditorForm : Form
             AllowUserToDeleteRows = false,
             SelectionMode = DataGridViewSelectionMode.FullRowSelect,
             MultiSelect = false,
-            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill, // Adicionado para preencher o espaço
-            BackgroundColor = Color.White, // Adicionado para cor de fundo branca
-            RowHeadersVisible = false // Remove a coluna em branco com a seta de seleção
+            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+            BackgroundColor = Color.White,
+            RowHeadersVisible = false
         };
         const string programNameColumnName = "ProgramNameDGV";
 
@@ -127,7 +122,6 @@ public class ConfigEditorForm : Form
         programSettingsLayout.Controls.Add(_grid, 0, 1);
         programSettingsGroup.Controls.Add(programSettingsLayout);
         
-        // 3. Botões de baixo
         _saveButton = new Button { Text = "Save && Restart", Width = 130, Enabled = false };
         _saveButton.Click += SaveButtonOnClick;
 
@@ -139,7 +133,6 @@ public class ConfigEditorForm : Form
         bottomPanel.Controls.Add(_saveButton);
         _saveButton.Dock = DockStyle.Right;
         
-        // Adiciona os grupos ao layout principal
         mainLayout.Controls.Add(globalSettingsGroup, 0, 0);
         mainLayout.Controls.Add(programSettingsGroup, 0, 1);
         mainLayout.Controls.Add(bottomPanel, 0, 2);
@@ -151,8 +144,8 @@ public class ConfigEditorForm : Form
 
     [AllowNull] public sealed override string Text
     {
-        get { return base.Text; }
-        set { base.Text = value; }
+        get => base.Text;
+        set => base.Text = value;
     }
 
     private void TryLoadDefaultConfig()
@@ -162,11 +155,9 @@ public class ConfigEditorForm : Form
 
         if (!File.Exists(localPath))
         {
-            // Cria um arquivo de configuração vazio se não existir
             _configService.CreateEmptyConfig(localPath);
         }
         
-        // Tenta carregar o arquivo (existente ou recém-criado)
         LoadConfigFile(localPath);
     }
 
@@ -177,7 +168,7 @@ public class ConfigEditorForm : Form
             _configPath = path;
             Program.CurrentConfigPath = path;
 
-            Text = $"AutoRefreshHDR - Config Editor ({path})";
+            Text = "AutoRefreshHDR - Config Editor";
             
             _currentConfig = _configService.LoadConfig(path);
 
@@ -192,28 +183,25 @@ public class ConfigEditorForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Erro ao ler appsettings.jsonc: {ex.Message}", "Erro",
+            MessageBox.Show($"Error reading appsettings.jsonc: {ex.Message}", "Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 
     private void GridOnEditingControlShowing(object? sender, DataGridViewEditingControlShowingEventArgs e)
     {
-        // Remove manipuladores de eventos anteriores para evitar anexações múltiplas
         e.Control.KeyPress -= NumericOnlyKeyPress;
     
         var columnName = _grid.Columns[_grid.CurrentCell.ColumnIndex].DataPropertyName;
 
         if (columnName is nameof(ProgramDisplayConfig.RefreshRate) or nameof(ProgramDisplayConfig.BrightnessLevel))
         {
-            // Adiciona o manipulador de eventos KeyPress para validação numérica
             e.Control.KeyPress += NumericOnlyKeyPress;
         }
     }
     
     private void NumericOnlyKeyPress(object? sender, KeyPressEventArgs e)
     {
-        // Permite apenas dígitos e teclas de controle (como backspace)
         if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
         {
             e.Handled = true;
@@ -232,8 +220,7 @@ public class ConfigEditorForm : Form
 
             if (uint.TryParse(cellValue, out var value) && value > 0x64)
             {
-                // Mostra um aviso e corrige o valor para 100
-                MessageBox.Show("O valor de Brightness não pode ser maior que 100. Ele será ajustado para 100.", "Valor Inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("The Brightness value cannot be greater than 100. It will be adjusted to 100.", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 cell.Value = (uint)100;
             }
         }
@@ -242,8 +229,8 @@ public class ConfigEditorForm : Form
     private void AddRow()
     {
         using var ofd = new OpenFileDialog();
-        ofd.Title = "Selecione o executável";
-        ofd.Filter = "Executables (*.exe)|*.exe|Todos os arquivos (*.*)|*.*";
+        ofd.Title = "Select the executable.";
+        ofd.Filter = "Executables (*.exe)|*.exe|All files (*.*)|*.*";
         ofd.CheckFileExists = true;
 
         if (ofd.ShowDialog(this) == DialogResult.OK)
@@ -251,7 +238,7 @@ public class ConfigEditorForm : Form
             var fileName = Path.GetFileName(ofd.FileName);
             if (_bindingList.Any(p => p.ProgramName.Equals(fileName, StringComparison.OrdinalIgnoreCase)))
             {
-                MessageBox.Show($"O programa '{fileName}' já existe na lista.", "Programa Duplicado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show($"The program '{{fileName}}' already exists in the list.", "Duplicate Program", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
             
@@ -280,12 +267,11 @@ public class ConfigEditorForm : Form
     {
         if (string.IsNullOrWhiteSpace(_configPath) || !File.Exists(_configPath))
         {
-            MessageBox.Show("Nenhum appsettings.jsonc válido selecionado.", "Erro",
+            MessageBox.Show("No valid appsettings.jsonc file selected.", "Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
             return;
         }
 
-        // Garante que edições pendentes na grid sejam aplicadas ao binding list
         _grid.EndEdit();
         if (BindingContext?[_bindingList] is CurrencyManager cm)
         {
