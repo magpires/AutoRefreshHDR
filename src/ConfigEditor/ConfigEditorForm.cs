@@ -112,7 +112,8 @@ public class ConfigEditorForm : Form
             SelectionMode = DataGridViewSelectionMode.FullRowSelect,
             MultiSelect = false,
             AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill, // Adicionado para preencher o espaço
-            BackgroundColor = Color.White // Adicionado para cor de fundo branca
+            BackgroundColor = Color.White, // Adicionado para cor de fundo branca
+            RowHeadersVisible = false // Remove a coluna em branco com a seta de seleção
         };
         const string programNameColumnName = "ProgramNameDGV";
 
