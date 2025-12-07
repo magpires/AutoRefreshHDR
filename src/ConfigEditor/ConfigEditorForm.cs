@@ -226,11 +226,11 @@ public class ConfigEditorForm : Form
             var cell = _grid.Rows[e.RowIndex].Cells[e.ColumnIndex];
             var cellValue = cell.Value?.ToString();
 
-            if (uint.TryParse(cellValue, out var value) && value > 100)
+            if (uint.TryParse(cellValue, out var value) && value > 0x64)
             {
                 // Mostra um aviso e corrige o valor para 100
                 MessageBox.Show("O valor de Brightness não pode ser maior que 100. Ele será ajustado para 100.", "Valor Inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                cell.Value = 100;
+                cell.Value = (uint)100;
             }
         }
     }
