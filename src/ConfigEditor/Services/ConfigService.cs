@@ -18,7 +18,6 @@ public class ConfigService
         };
 
         var config = JsonSerializer.Deserialize<DisplayConfig>(json, options) ?? new DisplayConfig();
-        config.ProgramDisplayConfigs ??= new List<ProgramDisplayConfig>();
         return config;
     }
 
