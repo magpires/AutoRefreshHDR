@@ -50,7 +50,7 @@ public class ConfigService
 
         if (!File.Exists(batPath))
         {
-            throw new FileNotFoundException($"RestartAutoRefreshHDR.bat não encontrado em {autoRefreshDir}", batPath);
+            throw new FileNotFoundException($"RestartAutoRefreshHDR.bat not found in {autoRefreshDir}", batPath);
         }
 
         var startInfo = new ProcessStartInfo

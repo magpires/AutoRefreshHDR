@@ -302,12 +302,12 @@ public class ConfigEditorForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Erro ao salvar ou reiniciar: {ex.Message}", "Erro",
+            MessageBox.Show($"Error saving or restarting: {ex.Message}", "Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
             return;
         }
 
-        MessageBox.Show("Configurações salvas e AutoRefreshHDR reiniciado.", "Sucesso",
+        MessageBox.Show("Settings saved and AutoRefreshHDR restarted.", "Sucess",
             MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
 }
