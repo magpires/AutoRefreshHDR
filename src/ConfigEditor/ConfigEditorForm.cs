@@ -1,7 +1,5 @@
-using System.Diagnostics;
-using System.Text;
-using System.Text.Json;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using ConfigEditor.Models;
 using ConfigEditor.Services;
 
@@ -10,7 +8,7 @@ namespace ConfigEditor;
 public class ConfigEditorForm : Form
 {
     private readonly CheckBox _chkUseAutoRefreshRate;
-    private readonly CheckBox _chkUseAutoHDR;
+    private readonly CheckBox _chkUseAutoHdr;
     private readonly CheckBox _chkUseBrightness;
 
     private readonly DataGridView _grid;
@@ -63,11 +61,11 @@ public class ConfigEditorForm : Form
         };
 
         _chkUseAutoRefreshRate = new CheckBox { Text = "Use Auto Refresh Rate", AutoSize = true, Padding = new Padding(0,0,20,0)};
-        _chkUseAutoHDR = new CheckBox { Text = "Use Auto HDR", AutoSize = true, Padding = new Padding(0,0,20,0) };
+        _chkUseAutoHdr = new CheckBox { Text = "Use Auto HDR", AutoSize = true, Padding = new Padding(0,0,20,0) };
         _chkUseBrightness = new CheckBox { Text = "Use Brightness Level", AutoSize = true };
 
         globalSettingsPanel.Controls.Add(_chkUseAutoRefreshRate);
-        globalSettingsPanel.Controls.Add(_chkUseAutoHDR);
+        globalSettingsPanel.Controls.Add(_chkUseAutoHdr);
         globalSettingsPanel.Controls.Add(_chkUseBrightness);
         globalSettingsGroup.Controls.Add(globalSettingsPanel);
 
@@ -150,7 +148,13 @@ public class ConfigEditorForm : Form
 
         Load += (_, _) => TryLoadDefaultConfig();
     }
-    
+
+    [AllowNull] public sealed override string Text
+    {
+        get { return base.Text; }
+        set { base.Text = value; }
+    }
+
     private void TryLoadDefaultConfig()
     {
         var baseDir = AppContext.BaseDirectory;
@@ -178,7 +182,7 @@ public class ConfigEditorForm : Form
             _currentConfig = _configService.LoadConfig(path);
 
             _chkUseAutoRefreshRate.Checked = _currentConfig.UseAutoRefreshRate;
-            _chkUseAutoHDR.Checked = _currentConfig.UseAutoHdr;
+            _chkUseAutoHdr.Checked = _currentConfig.UseAutoHdr;
             _chkUseBrightness.Checked = _currentConfig.UseBrightnessLevel;
 
             _bindingList = new BindingList<ProgramDisplayConfig>(_currentConfig.ProgramDisplayConfigs);
@@ -237,12 +241,10 @@ public class ConfigEditorForm : Form
 
     private void AddRow()
     {
-        using var ofd = new OpenFileDialog
-        {
-            Title = "Selecione o executável",
-            Filter = "Executables (*.exe)|*.exe|Todos os arquivos (*.*)|*.*",
-            CheckFileExists = true
-        };
+        using var ofd = new OpenFileDialog();
+        ofd.Title = "Selecione o executável";
+        ofd.Filter = "Executables (*.exe)|*.exe|Todos os arquivos (*.*)|*.*";
+        ofd.CheckFileExists = true;
 
         if (ofd.ShowDialog(this) == DialogResult.OK)
         {
@@ -285,13 +287,13 @@ public class ConfigEditorForm : Form
 
         // Garante que edições pendentes na grid sejam aplicadas ao binding list
         _grid.EndEdit();
-        if (BindingContext[_bindingList] is CurrencyManager cm)
+        if (BindingContext?[_bindingList] is CurrencyManager cm)
         {
             cm.EndCurrentEdit();
         }
 
         _currentConfig.UseAutoRefreshRate = _chkUseAutoRefreshRate.Checked;
-        _currentConfig.UseAutoHdr = _chkUseAutoHDR.Checked;
+        _currentConfig.UseAutoHdr = _chkUseAutoHdr.Checked;
         _currentConfig.UseBrightnessLevel = _chkUseBrightness.Checked;
         _currentConfig.ProgramDisplayConfigs = _bindingList.ToList();
 
