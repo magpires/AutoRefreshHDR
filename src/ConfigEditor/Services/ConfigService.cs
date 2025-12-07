@@ -38,7 +38,7 @@ public class ConfigService
         {
             ProgramDisplayConfigs = new List<ProgramDisplayConfig>(),
             UseAutoRefreshRate = true,
-            UseAutoHDR = true,
+            UseAutoHdr = true,
             UseBrightnessLevel = true
         };
         SaveConfig(path, emptyConfig);

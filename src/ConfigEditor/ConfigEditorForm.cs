@@ -178,7 +178,7 @@ public class ConfigEditorForm : Form
             _currentConfig = _configService.LoadConfig(path);
 
             _chkUseAutoRefreshRate.Checked = _currentConfig.UseAutoRefreshRate;
-            _chkUseAutoHDR.Checked = _currentConfig.UseAutoHDR;
+            _chkUseAutoHDR.Checked = _currentConfig.UseAutoHdr;
             _chkUseBrightness.Checked = _currentConfig.UseBrightnessLevel;
 
             _bindingList = new BindingList<ProgramDisplayConfig>(_currentConfig.ProgramDisplayConfigs);
@@ -291,7 +291,7 @@ public class ConfigEditorForm : Form
         }
 
         _currentConfig.UseAutoRefreshRate = _chkUseAutoRefreshRate.Checked;
-        _currentConfig.UseAutoHDR = _chkUseAutoHDR.Checked;
+        _currentConfig.UseAutoHdr = _chkUseAutoHDR.Checked;
         _currentConfig.UseBrightnessLevel = _chkUseBrightness.Checked;
         _currentConfig.ProgramDisplayConfigs = _bindingList.ToList();
 

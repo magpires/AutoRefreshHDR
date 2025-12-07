@@ -1,15 +1,12 @@
-using System.Text.Json.Serialization;
-
 namespace ConfigEditor.Models;
 
 public class DisplayConfig
 {
-    public List<ProgramDisplayConfig> ProgramDisplayConfigs { get; set; } = new();
+    public List<ProgramDisplayConfig> ProgramDisplayConfigs { get; set; } = [];
 
     public bool UseAutoRefreshRate { get; set; }
 
-    // Nome igual ao do JSON: "UseAutoHDR"
-    public bool UseAutoHDR { get; set; }
+    public bool UseAutoHdr { get; set; }
 
     public bool UseBrightnessLevel { get; set; }
 }
