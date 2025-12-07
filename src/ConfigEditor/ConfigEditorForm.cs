@@ -110,7 +110,9 @@ public class ConfigEditorForm : Form
             AllowUserToAddRows = false,
             AllowUserToDeleteRows = false,
             SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-            MultiSelect = false
+            MultiSelect = false,
+            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill, // Adicionado para preencher o espaço
+            BackgroundColor = Color.White // Adicionado para cor de fundo branca
         };
         const string programNameColumnName = "ProgramNameDGV";
 
