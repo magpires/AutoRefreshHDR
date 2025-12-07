@@ -2,10 +2,10 @@ using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using System.ComponentModel;
-using AutoRefreshHDR.ConfigEditor.Models;
-using AutoRefreshHDR.ConfigEditor.Services;
+using ConfigEditor.Models;
+using ConfigEditor.Services;
 
-namespace AutoRefreshHDR.ConfigEditor;
+namespace ConfigEditor;
 
 public class ConfigEditorForm : Form
 {
@@ -15,7 +15,6 @@ public class ConfigEditorForm : Form
 
     private readonly DataGridView _grid;
     private readonly Button _saveButton;
-    private readonly Button _openButton;
     private readonly Button _addRowButton;
     private readonly Button _removeRowButton;
     
@@ -130,18 +129,13 @@ public class ConfigEditorForm : Form
         _saveButton = new Button { Text = "Save && Restart", Width = 130, Enabled = false };
         _saveButton.Click += SaveButtonOnClick;
 
-        _openButton = new Button { Text = "Open appsettings.jsonc", Width = 180 };
-        _openButton.Click += OpenButtonOnClick;
-
         var bottomPanel = new Panel
         {
             Dock = DockStyle.Fill
         };
 
         bottomPanel.Controls.Add(_saveButton);
-        bottomPanel.Controls.Add(_openButton);
         _saveButton.Dock = DockStyle.Right;
-        _openButton.Dock = DockStyle.Left;
         
         // Adiciona os grupos ao layout principal
         mainLayout.Controls.Add(globalSettingsGroup, 0, 0);
@@ -155,42 +149,17 @@ public class ConfigEditorForm : Form
     
     private void TryLoadDefaultConfig()
     {
-        // 1) Tenta abrir um appsettings.jsonc no mesmo diretório do executável do editor
         var baseDir = AppContext.BaseDirectory;
         var localPath = Path.Combine(baseDir, "appsettings.jsonc");
 
-        if (File.Exists(localPath))
+        if (!File.Exists(localPath))
         {
-            LoadConfigFile(localPath);
-            return;
+            // Cria um arquivo de configuração vazio se não existir
+            _configService.CreateEmptyConfig(localPath);
         }
-
-        // 2) Caso não exista, força o usuário a escolher o arquivo do projeto AutoRefreshHDR
-        OpenConfigFileWithDialog();
-    }
-
-    private void OpenButtonOnClick(object? sender, EventArgs e)
-    {
-        OpenConfigFileWithDialog();
-    }
-
-    private void OpenConfigFileWithDialog()
-    {
-        using var ofd = new OpenFileDialog
-        {
-            Title = "Selecione o appsettings.jsonc do AutoRefreshHDR",
-            Filter = "JSON config (appsettings.jsonc)|appsettings.jsonc|Todos os arquivos (*.*)|*.*",
-            CheckFileExists = true,
-            CheckPathExists = true,
-            FileName = "appsettings.jsonc"
-        };
-
-        if (ofd.ShowDialog(this) != DialogResult.OK)
-        {
-            return;
-        }
-
-        LoadConfigFile(ofd.FileName);
+        
+        // Tenta carregar o arquivo (existente ou recém-criado)
+        LoadConfigFile(localPath);
     }
 
     private void LoadConfigFile(string path)

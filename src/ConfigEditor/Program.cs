@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Text;
 
-namespace AutoRefreshHDR.ConfigEditor;
+namespace ConfigEditor;
 
 static class Program
 {

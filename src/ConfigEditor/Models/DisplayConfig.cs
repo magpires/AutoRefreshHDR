@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace AutoRefreshHDR.ConfigEditor.Models;
+namespace ConfigEditor.Models;
 
 public class DisplayConfig
 {

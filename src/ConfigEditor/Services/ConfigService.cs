@@ -1,9 +1,9 @@
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
-using AutoRefreshHDR.ConfigEditor.Models;
+using ConfigEditor.Models;
 
-namespace AutoRefreshHDR.ConfigEditor.Services;
+namespace ConfigEditor.Services;
 
 public class ConfigService
 {
@@ -30,6 +30,18 @@ public class ConfigService
         };
         var json = JsonSerializer.Serialize(config, options);
         File.WriteAllText(path, json, Encoding.UTF8);
+    }
+    
+    public void CreateEmptyConfig(string path)
+    {
+        var emptyConfig = new DisplayConfig
+        {
+            ProgramDisplayConfigs = new List<ProgramDisplayConfig>(),
+            UseAutoRefreshRate = true,
+            UseAutoHDR = true,
+            UseBrightnessLevel = true
+        };
+        SaveConfig(path, emptyConfig);
     }
 
     public void RestartMainApp(string configPath)

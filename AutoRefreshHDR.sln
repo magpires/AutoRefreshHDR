@@ -5,7 +5,7 @@ VisualStudioVersion = 17.9.34728.123
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoRefreshHDR", "src\AutoRefreshHDR\AutoRefreshHDR.csproj", "{BE05CC46-96E8-4697-9745-27D7DDFE56AA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoRefreshHDR.ConfigEditor", "src\AutoRefreshHDR.ConfigEditor\AutoRefreshHDR.ConfigEditor.csproj", "{B87702E1-152A-44E4-A25F-AB3FF0E54F4D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConfigEditor", "src\ConfigEditor\ConfigEditor.csproj", "{B87702E1-152A-44E4-A25F-AB3FF0E54F4D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
