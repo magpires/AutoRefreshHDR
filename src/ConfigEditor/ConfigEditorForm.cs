@@ -119,7 +119,8 @@ public class ConfigEditorForm : Form
         _grid.Columns.Add(new DataGridViewCheckBoxColumn { DataPropertyName = nameof(ProgramDisplayConfig.Hdr), HeaderText = "HDR", Width = 60 });
         _grid.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = nameof(ProgramDisplayConfig.BrightnessLevel), HeaderText = "Brightness (0-100)", Width = 110 });
         _grid.Columns.Add(new DataGridViewCheckBoxColumn { DataPropertyName = nameof(ProgramDisplayConfig.Active), HeaderText = "Active", Width = 60 });
-        _grid.CellValidating += GridOnCellValidating;
+        _grid.EditingControlShowing += GridOnEditingControlShowing;
+        _grid.CellEndEdit += GridOnCellEndEdit;
         
         programSettingsLayout.Controls.Add(gridButtonsPanel, 0, 0);
         programSettingsLayout.Controls.Add(_grid, 0, 1);
@@ -189,40 +190,45 @@ public class ConfigEditorForm : Form
         }
     }
 
-    private void GridOnCellValidating(object? sender, DataGridViewCellValidatingEventArgs e)
+    private void GridOnEditingControlShowing(object? sender, DataGridViewEditingControlShowingEventArgs e)
     {
-        if (e.RowIndex < 0) return;
-        
-        var column = _grid.Columns[e.ColumnIndex];
-        
-        // A validação só se aplica a colunas que não são a de botão
-        if (column is DataGridViewButtonColumn) return;
+        // Remove manipuladores de eventos anteriores para evitar anexações múltiplas
+        e.Control.KeyPress -= NumericOnlyKeyPress;
+    
+        var columnName = _grid.Columns[_grid.CurrentCell.ColumnIndex].DataPropertyName;
 
-        var columnName = column.DataPropertyName;
         if (columnName is nameof(ProgramDisplayConfig.RefreshRate) or nameof(ProgramDisplayConfig.BrightnessLevel))
         {
-            var text = e.FormattedValue?.ToString();
-            if (string.IsNullOrWhiteSpace(text))
-            {
-                _grid.Rows[e.RowIndex].ErrorText = string.Empty;
-                return; // permite nulo
-            }
+            // Adiciona o manipulador de eventos KeyPress para validação numérica
+            e.Control.KeyPress += NumericOnlyKeyPress;
+        }
+    }
+    
+    private void NumericOnlyKeyPress(object? sender, KeyPressEventArgs e)
+    {
+        // Permite apenas dígitos e teclas de controle (como backspace)
+        if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
+        {
+            e.Handled = true;
+        }
+    }
 
-            if (!uint.TryParse(text, out var value))
-            {
-                e.Cancel = true;
-                _grid.Rows[e.RowIndex].ErrorText = "Digite apenas números inteiros.";
-                return;
-            }
+    private void GridOnCellEndEdit(object? sender, DataGridViewCellEventArgs e)
+    {
+        var column = _grid.Columns[e.ColumnIndex];
+        var columnName = column.DataPropertyName;
 
-            if (columnName == nameof(ProgramDisplayConfig.BrightnessLevel) && (value > 100))
-            {
-                e.Cancel = true;
-                _grid.Rows[e.RowIndex].ErrorText = "Brightness deve ser entre 0 e 100.";
-                return;
-            }
+        if (columnName == nameof(ProgramDisplayConfig.BrightnessLevel))
+        {
+            var cell = _grid.Rows[e.RowIndex].Cells[e.ColumnIndex];
+            var cellValue = cell.Value?.ToString();
 
-            _grid.Rows[e.RowIndex].ErrorText = string.Empty;
+            if (uint.TryParse(cellValue, out var value) && value > 100)
+            {
+                // Mostra um aviso e corrige o valor para 100
+                MessageBox.Show("O valor de Brightness não pode ser maior que 100. Ele será ajustado para 100.", "Valor Inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                cell.Value = 100;
+            }
         }
     }
 
