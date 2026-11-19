@@ -49,6 +49,8 @@ Estas são minhas preferências permanentes para os agentes de IA no projeto. Ma
 
 ## 7. Pull requests autorizadas
 
-- Quando eu solicitar explicitamente a abertura de uma PR, faça uma revisão de código após a criação da PR e adicione os achados no PR aberto.
+- Quando eu solicitar explicitamente a abertura de uma PR, use a skill `ton-review-pr` após a criação da PR.
 - A ideia de Conventional Commits com verbos imperativos também se aplica ao título dos PRs. Siga sempre que possível.
+- Para PRs abertos, siga o fluxo aplicável de `ton-review-pr` dentro da autorização concedida pelo meu pedido, sem aprovar, fazer merge ou alterar work items automaticamente.
+- Se a skill estiver ausente, inacessível ou não se aplicar ao provedor da PR, informe a limitação e proponha uma alternativa de revisão.
 - Um pedido para revisar uma PR existente, por si só, não autoriza commits, push, merge ou publicação de uma nova PR.
