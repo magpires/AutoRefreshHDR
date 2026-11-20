@@ -1,4 +1,4 @@
-﻿namespace ConfigEditor.Models
+namespace ConfigEditor.Models
 {
     public class ProgramDisplayConfig
     {
@@ -7,5 +7,6 @@
         public bool Hdr { get; init; }
         public uint? BrightnessLevel { get; init; }
         public bool Active { get; init; }
+        public bool OnlyWhenFullscreen { get; set; }
     }
 }

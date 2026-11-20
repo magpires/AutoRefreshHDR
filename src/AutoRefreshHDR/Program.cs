@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using AutoRefreshHDR.Models;
 using AutoRefreshHDR.Services;
 using Hanssens.Net;
@@ -66,6 +66,10 @@ internal abstract class Program
 
                     if (Process.GetProcessesByName(programDisplayConfig.ProgramName.Replace(".exe", "")).Length ==
                         0) continue;
+
+                    if (programDisplayConfig.OnlyWhenFullscreen &&
+                        !DisplaySettingsManagerService.IsProcessFullscreen(programDisplayConfig.ProgramName))
+                        continue;
                     
                     currentRefreshRate = DisplaySettingsManagerService.GetCurrentRefreshRate();
                     currentBrightnessLevel = DisplaySettingsManagerService.GetCurrentBrightness();
@@ -99,7 +103,34 @@ internal abstract class Program
 
                     while (Process.GetProcessesByName(programDisplayConfig.ProgramName.Replace(".exe", ""))
                                .Length != 0)
+                    {
+                        if (programDisplayConfig.OnlyWhenFullscreen &&
+                            !DisplaySettingsManagerService.IsProcessFullscreen(programDisplayConfig.ProgramName))
+                        {
+                            // Process is running but exited fullscreen → restore immediately
+                            if (displayConfig.UseAutoHdr && hdrActivated)
+                                DisplaySettingsManagerService.HdrSwitchOff();
+
+                            if (displayConfig.UseAutoRefreshRate && refreshRateChange)
+                                DisplaySettingsManagerService.SetRefreshRate(currentRefreshRate);
+
+                            if (displayConfig.UseBrightnessLevel && brightnessLevelChange)
+                            {
+                                if (refreshRateChange || hdrActivated)
+                                    Thread.Sleep(millisecondsToSetbrightness);
+
+                                DisplaySettingsManagerService.SetBrightness(currentBrightnessLevel);
+                            }
+
+                            DeleteLocalStorage();
+                            hdrActivated = false;
+                            refreshRateChange = false;
+                            brightnessLevelChange = false;
+                            break;
+                        }
+
                         Thread.Sleep(1000);
+                    }
                         
                     if (hdrActivated == false && refreshRateChange == false && brightnessLevelChange == false) continue;
 

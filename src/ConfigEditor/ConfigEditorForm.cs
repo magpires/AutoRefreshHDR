@@ -115,6 +115,7 @@ public class ConfigEditorForm : Form
         _grid.Columns.Add(new DataGridViewCheckBoxColumn { DataPropertyName = nameof(ProgramDisplayConfig.Hdr), HeaderText = "HDR", Width = 60 });
         _grid.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = nameof(ProgramDisplayConfig.BrightnessLevel), HeaderText = "Brightness (0-100)", Width = 110 });
         _grid.Columns.Add(new DataGridViewCheckBoxColumn { DataPropertyName = nameof(ProgramDisplayConfig.Active), HeaderText = "Active", Width = 60 });
+        _grid.Columns.Add(new DataGridViewCheckBoxColumn { DataPropertyName = nameof(ProgramDisplayConfig.OnlyWhenFullscreen), HeaderText = "Only Fullscreen", Width = 110 });
         _grid.EditingControlShowing += GridOnEditingControlShowing;
         _grid.CellEndEdit += GridOnCellEndEdit;
         
@@ -248,7 +249,8 @@ public class ConfigEditorForm : Form
                 RefreshRate = null,
                 Hdr = false,
                 BrightnessLevel = 100,
-                Active = true
+                Active = true,
+                OnlyWhenFullscreen = false
             });
         }
     }

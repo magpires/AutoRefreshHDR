@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using static AutoRefreshHDR.Models.DisplaySettingsManager;
 
@@ -45,6 +45,27 @@ public abstract class DisplaySettingsManagerService
 
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
         public string szPhysicalMonitorDescription;
+    }
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool GetWindowRect(IntPtr hwnd, out RECT lpRect);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool GetMonitorInfo(IntPtr hMonitor, ref MONITORINFO lpmi);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct RECT
+    {
+        public int Left, Top, Right, Bottom;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct MONITORINFO
+    {
+        public int cbSize;
+        public RECT rcMonitor;
+        public RECT rcWork;
+        public uint dwFlags;
     }
 
     /// <summary>
@@ -205,5 +226,40 @@ public abstract class DisplaySettingsManagerService
         }
 
         DestroyPhysicalMonitors(numberOfMonitors, physicalMonitors);
+    }
+
+    /// <summary>
+    ///     Returns true if any window of the given process covers the entire screen area of its monitor.
+    /// </summary>
+    /// <param name="processName">The process name (with or without .exe extension).</param>
+    public static bool IsProcessFullscreen(string processName)
+    {
+        var cleanName = processName.Replace(".exe", "");
+        var processes = Process.GetProcessesByName(cleanName);
+
+        foreach (var process in processes)
+        {
+            var hwnd = process.MainWindowHandle;
+            if (hwnd == IntPtr.Zero) continue;
+
+            if (!GetWindowRect(hwnd, out var windowRect)) continue;
+
+            var hMonitor = MonitorFromWindow(hwnd, MonitorDefaulttoprimary);
+            var monitorInfo = new MONITORINFO { cbSize = Marshal.SizeOf<MONITORINFO>() };
+
+            if (!GetMonitorInfo(hMonitor, ref monitorInfo)) continue;
+
+            var screen = monitorInfo.rcMonitor;
+
+            if (windowRect.Left <= screen.Left &&
+                windowRect.Top <= screen.Top &&
+                windowRect.Right >= screen.Right &&
+                windowRect.Bottom >= screen.Bottom)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace AutoRefreshHDR.Models
+namespace AutoRefreshHDR.Models
 {
     public class ProgramDisplayConfig
     {
@@ -7,5 +7,6 @@
         public bool Hdr { get; set; }
         public uint? BrightnessLevel { get; set; }
         public bool Active { get; init; }
+        public bool OnlyWhenFullscreen { get; set; }
     }
 }
