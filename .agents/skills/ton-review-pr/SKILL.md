@@ -1,3 +1,9 @@
+---
+name: ton-review-pr
+description: >-
+  Avalia PRs .NET e comenta achados diretamente no serviço em nuvem em que está armazenada (Github, Azure DevOps e etc)
+---
+
 # Ton Review PR
 
 ## 1. Objetivo
