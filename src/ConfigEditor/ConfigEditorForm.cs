@@ -110,11 +110,11 @@ public class ConfigEditorForm : Form
         };
         const string programNameColumnName = "ProgramNameDGV";
 
+        _grid.Columns.Add(new DataGridViewCheckBoxColumn { DataPropertyName = nameof(ProgramDisplayConfig.Active), HeaderText = "Active", Width = 60 });
         _grid.Columns.Add(new DataGridViewTextBoxColumn { Name= programNameColumnName, DataPropertyName = nameof(ProgramDisplayConfig.ProgramName), HeaderText = "Program Name", Width = 300 });
         _grid.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = nameof(ProgramDisplayConfig.RefreshRate), HeaderText = "Refresh (Hz)", Width = 90 });
         _grid.Columns.Add(new DataGridViewCheckBoxColumn { DataPropertyName = nameof(ProgramDisplayConfig.Hdr), HeaderText = "HDR", Width = 60 });
         _grid.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = nameof(ProgramDisplayConfig.BrightnessLevel), HeaderText = "Brightness (0-100)", Width = 110 });
-        _grid.Columns.Add(new DataGridViewCheckBoxColumn { DataPropertyName = nameof(ProgramDisplayConfig.Active), HeaderText = "Active", Width = 60 });
         _grid.Columns.Add(new DataGridViewCheckBoxColumn { DataPropertyName = nameof(ProgramDisplayConfig.OnlyWhenFullscreen), HeaderText = "Only Fullscreen", Width = 110 });
         _grid.EditingControlShowing += GridOnEditingControlShowing;
         _grid.CellEndEdit += GridOnCellEndEdit;
