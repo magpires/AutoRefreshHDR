@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using static AutoRefreshHDR.Models.DisplaySettingsManager;
+using static Shared.Models.DisplaySettingsManager;
 
-namespace AutoRefreshHDR.Services;
+namespace Shared.Services;
 
 public abstract class DisplaySettingsManagerService
 {
@@ -69,16 +69,32 @@ public abstract class DisplaySettingsManagerService
     }
 
     /// <summary>
-    ///     Returns the current refresh rate of the monitor.
+    ///     Tries to get the current refresh rate of the monitor without showing error dialogs.
     /// </summary>
-    public static uint GetCurrentRefreshRate()
+    public static bool TryGetCurrentRefreshRate(out uint refreshRate)
     {
         var dm = new DEVMODE
         {
             dmSize = (short)Marshal.SizeOf(typeof(DEVMODE))
         };
         
-        if (EnumDisplaySettings(null, ENUM_CURRENT_SETTINGS, ref dm)) return dm.dmDisplayFrequency;
+        if (EnumDisplaySettings(null, ENUM_CURRENT_SETTINGS, ref dm) && dm.dmDisplayFrequency > 0)
+        {
+            refreshRate = dm.dmDisplayFrequency;
+            return true;
+        }
+
+        refreshRate = 0;
+        return false;
+    }
+
+    /// <summary>
+    ///     Returns the current refresh rate of the monitor.
+    /// </summary>
+    public static uint GetCurrentRefreshRate()
+    {
+        if (TryGetCurrentRefreshRate(out var refreshRate))
+            return refreshRate;
 
         MessageBox.Show("Error getting current refresh rate", "Error getting current refresh rate",
             MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -170,34 +186,48 @@ public abstract class DisplaySettingsManagerService
     }
 
     /// <summary>
+    ///     Tries to get the current brightness of the monitor as a percentage (0–100) without throwing.
+    /// </summary>
+    public static bool TryGetCurrentBrightness(out uint brightnessPercentage)
+    {
+        brightnessPercentage = 0;
+        var hMonitor = MonitorFromWindow(IntPtr.Zero, MonitorDefaulttoprimary);
+
+        if (!GetNumberOfPhysicalMonitorsFromHMONITOR(hMonitor, out var numberOfMonitors) || numberOfMonitors <= 0)
+            return false;
+
+        var physicalMonitors = new PHYSICAL_MONITOR[numberOfMonitors];
+
+        if (!GetPhysicalMonitorsFromHMONITOR(hMonitor, numberOfMonitors, physicalMonitors))
+            return false;
+
+        try
+        {
+            foreach (var monitor in physicalMonitors)
+            {
+                if (!GetMonitorBrightness(monitor.hPhysicalMonitor, out var min, out var current, out var max))
+                    continue;
+
+                if (max <= min) continue;
+
+                brightnessPercentage = (uint)Math.Round((double)(current - min) / (max - min) * 100);
+                return true;
+            }
+        }
+        finally
+        {
+            DestroyPhysicalMonitors(numberOfMonitors, physicalMonitors);
+        }
+
+        return false;
+    }
+
+    /// <summary>
     ///     Returns the current brightness of the monitor as a percentage (0–100).
     /// </summary>
     public static uint GetCurrentBrightness()
     {
-        var hMonitor = MonitorFromWindow(IntPtr.Zero, MonitorDefaulttoprimary);
-
-        if (GetNumberOfPhysicalMonitorsFromHMONITOR(hMonitor, out var numberOfMonitors) == false ||
-            numberOfMonitors <= 0) return 0;
-
-        var physicalMonitors = new PHYSICAL_MONITOR[numberOfMonitors];
-
-        if (GetPhysicalMonitorsFromHMONITOR(hMonitor, numberOfMonitors, physicalMonitors) == false) return 0;
-
-        foreach (var monitor in physicalMonitors)
-        {
-            if (GetMonitorBrightness(monitor.hPhysicalMonitor, out var min, out var current, out var max) == false)
-                continue;
-
-            DestroyPhysicalMonitors(numberOfMonitors, physicalMonitors);
-
-            if (max <= min) return 0;
-
-            var percent = (uint)Math.Round((double)(current - min) / (max - min) * 100);
-
-            return percent;
-        }
-
-        return 0;
+        return TryGetCurrentBrightness(out var brightness) ? brightness : 0;
     }
     
     /// <summary>

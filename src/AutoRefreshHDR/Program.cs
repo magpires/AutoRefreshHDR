@@ -1,6 +1,6 @@
 using System.Diagnostics;
-using AutoRefreshHDR.Models;
-using AutoRefreshHDR.Services;
+using Shared.Models;
+using Shared.Services;
 using Hanssens.Net;
 using Microsoft.Extensions.Configuration;
 

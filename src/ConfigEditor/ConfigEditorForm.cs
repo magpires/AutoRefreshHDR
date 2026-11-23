@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
-using ConfigEditor.Models;
+using Shared.Models;
+using Shared.Services;
 using ConfigEditor.Services;
 
 namespace ConfigEditor;
@@ -233,14 +234,29 @@ public class ConfigEditorForm : Form
         }
     }
 
+    private static (uint RefreshRate, uint Brightness) GetDefaultDisplaySettings()
+    {
+        var refreshRate = DisplaySettingsManagerService.TryGetCurrentRefreshRate(out var currentRefresh) && currentRefresh > 0
+            ? currentRefresh
+            : 60;
+
+        var brightness = DisplaySettingsManagerService.TryGetCurrentBrightness(out var currentBrightness)
+            ? currentBrightness
+            : 50;
+
+        return (refreshRate, brightness);
+    }
+
     private void AddRow()
     {
+        var (defaultRefresh, defaultBrightness) = GetDefaultDisplaySettings();
+
         var newConfig = new ProgramDisplayConfig
         {
             ProgramName = string.Empty,
-            RefreshRate = null,
+            RefreshRate = defaultRefresh,
             Hdr = false,
-            BrightnessLevel = 100,
+            BrightnessLevel = defaultBrightness,
             Active = true,
             OnlyWhenFullscreen = false
         };
@@ -274,13 +290,15 @@ public class ConfigEditorForm : Form
                 MessageBox.Show($"The program '{fileName}' already exists in the list.", "Duplicate Program", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
+
+            var (defaultRefresh, defaultBrightness) = GetDefaultDisplaySettings();
             
             _bindingList.Add(new ProgramDisplayConfig
             {
                 ProgramName = fileName,
-                RefreshRate = null,
+                RefreshRate = defaultRefresh,
                 Hdr = false,
-                BrightnessLevel = 100,
+                BrightnessLevel = defaultBrightness,
                 Active = true,
                 OnlyWhenFullscreen = false
             });

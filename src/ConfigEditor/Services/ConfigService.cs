@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
-using ConfigEditor.Models;
+using Shared.Models;
 
 namespace ConfigEditor.Services;
 
