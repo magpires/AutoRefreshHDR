@@ -7,6 +7,8 @@ namespace ConfigEditor;
 
 public class ConfigEditorForm : Form
 {
+    private const string ProgramNameColumnName = "ProgramNameDGV";
+
     private readonly CheckBox _chkUseAutoRefreshRate;
     private readonly CheckBox _chkUseAutoHdr;
     private readonly CheckBox _chkUseBrightness;
@@ -14,6 +16,7 @@ public class ConfigEditorForm : Form
     private readonly DataGridView _grid;
     private readonly Button _saveButton;
     private readonly Button _addRowButton;
+    private readonly Button _addFileRowButton;
     private readonly Button _removeRowButton;
     
     private readonly ConfigService _configService;
@@ -85,6 +88,9 @@ public class ConfigEditorForm : Form
         _addRowButton = new Button { Text = "+ Add", Width = 70 };
         _addRowButton.Click += (_, _) => AddRow();
 
+        _addFileRowButton = new Button { Text = "+ Add File...", Width = 95 };
+        _addFileRowButton.Click += (_, _) => AddRowByFile();
+
         _removeRowButton = new Button { Text = "- Remove", Width = 80 };
         _removeRowButton.Click += (_, _) => RemoveSelectedRow();
         
@@ -94,6 +100,7 @@ public class ConfigEditorForm : Form
             FlowDirection = FlowDirection.LeftToRight,
         };
         gridButtonsPanel.Controls.Add(_addRowButton);
+        gridButtonsPanel.Controls.Add(_addFileRowButton);
         gridButtonsPanel.Controls.Add(_removeRowButton);
         
         _grid = new DataGridView
@@ -108,10 +115,9 @@ public class ConfigEditorForm : Form
             BackgroundColor = Color.White,
             RowHeadersVisible = false
         };
-        const string programNameColumnName = "ProgramNameDGV";
 
         _grid.Columns.Add(new DataGridViewCheckBoxColumn { DataPropertyName = nameof(ProgramDisplayConfig.Active), HeaderText = "Active", Width = 60 });
-        _grid.Columns.Add(new DataGridViewTextBoxColumn { Name= programNameColumnName, DataPropertyName = nameof(ProgramDisplayConfig.ProgramName), HeaderText = "Program Name", Width = 300 });
+        _grid.Columns.Add(new DataGridViewTextBoxColumn { Name = ProgramNameColumnName, DataPropertyName = nameof(ProgramDisplayConfig.ProgramName), HeaderText = "Program Name", Width = 300 });
         _grid.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = nameof(ProgramDisplayConfig.RefreshRate), HeaderText = "Refresh (Hz)", Width = 90 });
         _grid.Columns.Add(new DataGridViewCheckBoxColumn { DataPropertyName = nameof(ProgramDisplayConfig.Hdr), HeaderText = "HDR", Width = 60 });
         _grid.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = nameof(ProgramDisplayConfig.BrightnessLevel), HeaderText = "Brightness (0-100)", Width = 110 });
@@ -229,6 +235,32 @@ public class ConfigEditorForm : Form
 
     private void AddRow()
     {
+        var newConfig = new ProgramDisplayConfig
+        {
+            ProgramName = string.Empty,
+            RefreshRate = null,
+            Hdr = false,
+            BrightnessLevel = 100,
+            Active = true,
+            OnlyWhenFullscreen = false
+        };
+        _bindingList.Add(newConfig);
+
+        var newIndex = _bindingList.IndexOf(newConfig);
+        if (newIndex >= 0 && newIndex < _grid.Rows.Count)
+        {
+            _grid.ClearSelection();
+            _grid.Rows[newIndex].Selected = true;
+            var programNameCol = _grid.Columns[ProgramNameColumnName];
+            if (programNameCol != null)
+            {
+                _grid.CurrentCell = _grid.Rows[newIndex].Cells[programNameCol.Index];
+            }
+        }
+    }
+
+    private void AddRowByFile()
+    {
         using var ofd = new OpenFileDialog();
         ofd.Title = "Select the executable.";
         ofd.Filter = "Executables (*.exe)|*.exe|All files (*.*)|*.*";
@@ -239,7 +271,7 @@ public class ConfigEditorForm : Form
             var fileName = Path.GetFileName(ofd.FileName);
             if (_bindingList.Any(p => p.ProgramName.Equals(fileName, StringComparison.OrdinalIgnoreCase)))
             {
-                MessageBox.Show($"The program '{{fileName}}' already exists in the list.", "Duplicate Program", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show($"The program '{fileName}' already exists in the list.", "Duplicate Program", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
             
