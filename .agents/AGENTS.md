@@ -19,6 +19,8 @@ Estas são minhas preferências permanentes para os agentes de IA no projeto. Ma
 - Uma solicitação explícita minha autoriza somente a ação solicitada e os passos indispensáveis à sua execução. Não interprete um pedido de implementação, correção, teste ou conclusão como autorização para publicar.
 - Se uma etapa exigir uma ação restrita ainda não autorizada, conclua primeiro o trabalho local compatível, apresente o resultado revisável e peça minha autorização antes de executar a ação restrita.
 - A atualização com `git pull --ff-only` prevista na seção 1 é uma exceção autorizada à restrição de operações Git; ela não autoriza merges manuais nem commits de merge.
+- Documente todas as alterações feitas de forma clara e coesa, explicando os motivos, decisões tomadas, resultados esperados, dentre outras coisas importantes que devem ser documentadas.
+- As documentações serão feitas em arquivos .md seguindo a seguinte estruturação: docs/features para documentar novas features e docs/fixes para documentação de fixes que foram aplicadas. 
 
 ## 3. Preservação do trabalho existente
 
