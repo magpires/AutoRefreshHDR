@@ -125,6 +125,9 @@ public class ConfigEditorForm : Form
         _grid.Columns.Add(new DataGridViewCheckBoxColumn { DataPropertyName = nameof(ProgramDisplayConfig.OnlyWhenFullscreen), HeaderText = "Only Fullscreen", Width = 110 });
         _grid.EditingControlShowing += GridOnEditingControlShowing;
         _grid.CellEndEdit += GridOnCellEndEdit;
+        _grid.CurrentCellDirtyStateChanged += GridOnCurrentCellDirtyStateChanged;
+        _grid.CellValueChanged += GridOnCellValueChanged;
+        _grid.DataBindingComplete += GridOnDataBindingComplete;
         
         programSettingsLayout.Controls.Add(gridButtonsPanel, 0, 0);
         programSettingsLayout.Controls.Add(_grid, 0, 1);
@@ -231,6 +234,66 @@ public class ConfigEditorForm : Form
                 MessageBox.Show("The Brightness value cannot be greater than 100. It will be adjusted to 100.", "Invalid Value", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 cell.Value = (uint)100;
             }
+        }
+    }
+
+    private void GridOnCurrentCellDirtyStateChanged(object? sender, EventArgs e)
+    {
+        if (_grid.IsCurrentCellDirty && _grid.CurrentCell is DataGridViewCheckBoxCell)
+            _grid.CommitEdit(DataGridViewDataErrorContexts.Commit);
+    }
+
+    private void GridOnCellValueChanged(object? sender, DataGridViewCellEventArgs e)
+    {
+        if (e.RowIndex < 0) return;
+
+        var changedColumn = _grid.Columns[e.ColumnIndex];
+        if (changedColumn.DataPropertyName != nameof(ProgramDisplayConfig.Hdr)) return;
+
+        var isHdrEnabled = _grid.Rows[e.RowIndex].Cells[e.ColumnIndex].Value is true;
+        ApplyFullscreenLock(e.RowIndex, isHdrEnabled);
+    }
+
+    private void GridOnDataBindingComplete(object? sender, DataGridViewBindingCompleteEventArgs e)
+    {
+        var hdrColIndex = _grid.Columns
+            .Cast<DataGridViewColumn>()
+            .FirstOrDefault(c => c.DataPropertyName == nameof(ProgramDisplayConfig.Hdr))?.Index;
+
+        if (hdrColIndex is null) return;
+
+        foreach (DataGridViewRow row in _grid.Rows)
+        {
+            var isHdrEnabled = row.Cells[hdrColIndex.Value].Value is true;
+            ApplyFullscreenLock(row.Index, isHdrEnabled);
+        }
+    }
+
+    private void ApplyFullscreenLock(int rowIndex, bool isHdrEnabled)
+    {
+        var fullscreenCol = _grid.Columns
+            .Cast<DataGridViewColumn>()
+            .FirstOrDefault(c => c.DataPropertyName == nameof(ProgramDisplayConfig.OnlyWhenFullscreen));
+
+        if (fullscreenCol is null) return;
+
+        var fullscreenCell = _grid.Rows[rowIndex].Cells[fullscreenCol.Index];
+
+        if (isHdrEnabled)
+        {
+            fullscreenCell.Value = false;
+            fullscreenCell.ReadOnly = true;
+            fullscreenCell.Style.BackColor = SystemColors.Control;
+            fullscreenCell.Style.ForeColor = SystemColors.GrayText;
+            fullscreenCell.ToolTipText =
+                "Only Fullscreen is not available when HDR is enabled. This option only works in SDR mode.";
+        }
+        else
+        {
+            fullscreenCell.ReadOnly = false;
+            fullscreenCell.Style.BackColor = Color.White;
+            fullscreenCell.Style.ForeColor = SystemColors.ControlText;
+            fullscreenCell.ToolTipText = string.Empty;
         }
     }
 
