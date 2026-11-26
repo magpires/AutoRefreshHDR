@@ -267,29 +267,37 @@ public abstract class DisplaySettingsManagerService
         var cleanName = processName.Replace(".exe", "");
         var processes = Process.GetProcessesByName(cleanName);
 
-        foreach (var process in processes)
+        try
         {
-            var hwnd = process.MainWindowHandle;
-            if (hwnd == IntPtr.Zero) continue;
-
-            if (!GetWindowRect(hwnd, out var windowRect)) continue;
-
-            var hMonitor = MonitorFromWindow(hwnd, MonitorDefaulttoprimary);
-            var monitorInfo = new MONITORINFO { cbSize = Marshal.SizeOf<MONITORINFO>() };
-
-            if (!GetMonitorInfo(hMonitor, ref monitorInfo)) continue;
-
-            var screen = monitorInfo.rcMonitor;
-
-            if (windowRect.Left <= screen.Left &&
-                windowRect.Top <= screen.Top &&
-                windowRect.Right >= screen.Right &&
-                windowRect.Bottom >= screen.Bottom)
+            foreach (var process in processes)
             {
-                return true;
-            }
-        }
+                var hwnd = process.MainWindowHandle;
+                if (hwnd == IntPtr.Zero) continue;
 
-        return false;
+                if (!GetWindowRect(hwnd, out var windowRect)) continue;
+
+                var hMonitor = MonitorFromWindow(hwnd, MonitorDefaulttoprimary);
+                var monitorInfo = new MONITORINFO { cbSize = Marshal.SizeOf<MONITORINFO>() };
+
+                if (!GetMonitorInfo(hMonitor, ref monitorInfo)) continue;
+
+                var screen = monitorInfo.rcMonitor;
+
+                if (windowRect.Left <= screen.Left &&
+                    windowRect.Top <= screen.Top &&
+                    windowRect.Right >= screen.Right &&
+                    windowRect.Bottom >= screen.Bottom)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        finally
+        {
+            foreach (var process in processes)
+                process.Dispose();
+        }
     }
 }

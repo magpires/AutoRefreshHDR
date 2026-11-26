@@ -51,13 +51,16 @@ internal abstract class Program
             var hdrActivated = false;
             var refreshRateChange = false;
             var brightnessLevelChange = false;
+            var fullscreenConfigs = displayConfig.ProgramDisplayConfigs
+                .Where(p => p is { Active: true, OnlyWhenFullscreen: true })
+                .ToArray();
             
             while (true)
             {
-                while (processCount == Process.GetProcesses().Length)
+                while (processCount == GetProcessCount() && !HasAnyFullscreenProgram(fullscreenConfigs))
                     Thread.Sleep(1000);
 
-                processCount = Process.GetProcesses().Length;
+                processCount = GetProcessCount();
 
                 foreach (var programDisplayConfig in displayConfig.ProgramDisplayConfigs)
                 {
@@ -259,5 +262,33 @@ internal abstract class Program
     {
         using var storage = new LocalStorage();
         storage.Clear();
+    }
+
+    /// <summary>
+    ///     Returns true if any active fullscreen-only configured program is currently in fullscreen.
+    /// </summary>
+    private static bool HasAnyFullscreenProgram(ProgramDisplayConfig[] fullscreenConfigs)
+    {
+        foreach (var config in fullscreenConfigs)
+        {
+            if (DisplaySettingsManagerService.IsProcessFullscreen(config.ProgramName))
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    ///     Returns the total number of running OS processes and disposes the process handles.
+    /// </summary>
+    private static int GetProcessCount()
+    {
+        var processes = Process.GetProcesses();
+        var count = processes.Length;
+
+        foreach (var process in processes)
+            process.Dispose();
+
+        return count;
     }
 }
