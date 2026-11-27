@@ -21,6 +21,7 @@ Estas são minhas preferências permanentes para os agentes de IA no projeto. Ma
 - A atualização com `git pull --ff-only` prevista na seção 1 é uma exceção autorizada à restrição de operações Git; ela não autoriza merges manuais nem commits de merge.
 - Documente todas as alterações feitas de forma clara e coesa, explicando os motivos, decisões tomadas, resultados esperados, dentre outras coisas importantes que devem ser documentadas.
 - As documentações serão feitas em arquivos .md seguindo a seguinte estruturação: docs/features para documentar novas features e docs/fixes para documentação de fixes que foram aplicadas.
+- Todas as documentações devem ser feitas por padrão em português (pt‑BR)
 - Se a pasta docs não existir, crie a mesma e suas subpastas quando necessário.
 
 ## 3. Preservação do trabalho existente
