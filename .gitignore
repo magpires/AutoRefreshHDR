@@ -366,3 +366,6 @@ FodyWeavers.xsd
 /.idea/.idea.AutoRefreshHDR/.idea/.gitignore
 /.idea/.idea.AutoRefreshHDR/.idea/indexLayout.xml
 /.idea/.idea.AutoRefreshHDR/.idea/vcs.xml
+
+# Ignore generated releases folder
+releases/
