@@ -162,7 +162,7 @@ public class ConfigEditorForm : Form
     private void TryLoadDefaultConfig()
     {
         var baseDir = AppContext.BaseDirectory;
-        var localPath = Path.Combine(baseDir, "appsettings.jsonc");
+        var localPath = Path.Combine(baseDir, "appsettings.json");
 
         if (!File.Exists(localPath))
         {
@@ -194,7 +194,7 @@ public class ConfigEditorForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Error reading appsettings.jsonc: {ex.Message}", "Error",
+            MessageBox.Show($"Error reading appsettings.json: {ex.Message}", "Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
