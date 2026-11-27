@@ -19,7 +19,7 @@ internal abstract class Program
             Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.Idle;
 
             var configuration = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.jsonc", false, true)
+                .AddJsonFile("appsettings.json", false, true)
                 .Build();
 
             var displayConfig = configuration.Get<DisplayConfig>() ?? new DisplayConfig();

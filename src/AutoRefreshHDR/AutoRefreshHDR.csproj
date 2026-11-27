@@ -13,6 +13,7 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <!-- Evita gerar TargetFrameworkAttribute duplicado -->
     <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+      <RuntimeIdentifier>win-x64</RuntimeIdentifier>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,7 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="appsettings.jsonc">
+    <None Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="KillAutoRefreshHDR.bat">
