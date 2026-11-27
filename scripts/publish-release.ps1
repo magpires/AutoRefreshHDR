@@ -87,7 +87,7 @@ else {
 
 Write-Host ""
 Write-Host "Publicando AutoRefreshHDR (win-x64, framework-dependent, single-file, ReadyToRun)..." -ForegroundColor Cyan
-& dotnet publish $coreProject -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -p:PublishReadyToRun=true -o $targetDir
+& dotnet publish $coreProject -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:DebugType=None -o $targetDir
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Erro ao publicar o projeto AutoRefreshHDR." -ForegroundColor Red
     exit $LASTEXITCODE
@@ -95,7 +95,7 @@ if ($LASTEXITCODE -ne 0) {
 
 Write-Host ""
 Write-Host "Publicando ConfigEditor (win-x64, framework-dependent, single-file, ReadyToRun)..." -ForegroundColor Cyan
-& dotnet publish $editorProject -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -p:PublishReadyToRun=true -o $targetDir
+& dotnet publish $editorProject -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:DebugType=None -o $targetDir
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Erro ao publicar o projeto ConfigEditor." -ForegroundColor Red
     exit $LASTEXITCODE
