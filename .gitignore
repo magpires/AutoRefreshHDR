@@ -369,3 +369,6 @@ FodyWeavers.xsd
 
 # Ignore generated releases folder
 releases/
+
+# Ignore generated release-notes folder
+release-notes/
